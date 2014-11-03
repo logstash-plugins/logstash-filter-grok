@@ -176,10 +176,6 @@ class LogStash::Filters::Grok < LogStash::Filters::Base
   #     NUMBER \d+
   config :patterns_dir, :validate => :array, :default => []
 
-  # Drop if matched. Note, this feature may not stay. It is preferable to combine
-  # grok + grep filters to do parsing + dropping.
-  config :drop_if_match, :validate => :boolean, :default => false
-
   # Break on first match. The first successful match by grok will result in the
   # filter being finished. If you want grok to try all patterns (maybe you are
   # parsing different things), then set this to false.
