@@ -2,6 +2,7 @@
 require "logstash/filters/base"
 require "logstash/namespace"
 require "logstash/environment"
+require "logstash/patterns/core"
 require "set"
 
 # Parse arbitrary text and structure it.
