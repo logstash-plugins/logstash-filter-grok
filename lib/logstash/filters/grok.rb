@@ -21,7 +21,7 @@
   # If you need help building patterns to match your logs, you will find the
   # <http://grokdebug.herokuapp.com> too quite useful!
   #
-  # #### Grok Basics
+  # ==== Grok Basics
   #
   # Grok works by combining text patterns into something that matches your
   # logs.
@@ -47,7 +47,7 @@
   # For example `%{NUMBER:num:int}` which converts the `num` semantic from a string to an
   # integer. Currently the only supported conversions are `int` and `float`.
   #
-  # #### Example
+  # .Examples:
   #
   # With that idea of a syntax and semantic, we can pull out useful fields from a
   # sample log like this fictional http request log:
@@ -79,14 +79,14 @@
   # * `bytes: 15824`
   # * `duration: 0.043`
   #
-  # #### Regular Expressions
+  # ==== Regular Expressions
   #
   # Grok sits on top of regular expressions, so any regular expressions are valid
   # in grok as well. The regular expression library is Oniguruma, and you can see
   # the full supported regexp syntax [on the Onigiruma
   # site](http://www.geocities.jp/kosako3/oniguruma/doc/RE.txt).
   #
-  # #### Custom Patterns
+  # ==== Custom Patterns
   #
   # Sometimes logstash doesn't have a pattern you need. For this, you have
   # a few options.
@@ -209,8 +209,8 @@
     #       }
     #     }
     #
-    #  In this case, a line like `May 29 16:37:11 sadness logger: hello world`
-    #  will be parsed and `hello world` will overwrite the original message.
+    # In this case, a line like `May 29 16:37:11 sadness logger: hello world`
+    # will be parsed and `hello world` will overwrite the original message.
     config :overwrite, :validate => :array, :default => []
   
     # Detect if we are running from a jarfile, pick the right path.
