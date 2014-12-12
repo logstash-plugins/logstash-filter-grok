@@ -215,8 +215,10 @@
   
     # Detect if we are running from a jarfile, pick the right path.
     @@patterns_path ||= Set.new
-  #@@patterns_path += [LogStash::Environment.pattern_path("*")]
-    @@patterns_path += [LogStash::Patterns::Core.path]
+    @@patterns_path += [
+      LogStash::Patterns::Core.path,
+      LogStash::Environment.pattern_path("*")
+    ]
   
     public
     def initialize(params)
