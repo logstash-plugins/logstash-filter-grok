@@ -644,5 +644,55 @@ describe LogStash::Filters::Grok do
     end
   end
 
+  describe "patterns in the 'patterns/' dir override core patterns" do
+    require 'tmpdir'
+    require 'tempfile'
+
+    before do
+      pattern_dir = File.join(LogStash::Environment::LOGSTASH_HOME, "patterns")
+      @file = Tempfile.new('grok', pattern_dir);
+      @file.write('WORD \b[2-5]\b')
+      @file.rewind
+    end
+
+    let(:config) do
+      'filter { grok { pattern => "%{WORD:word}" } }'
+    end
+
+    sample("message" => 'hello') do
+      insist { subject["tags"] } == ["_grokparsefailure"]
+    end
+
+    after do
+      @file.close; @file.unlink
+    end
+  end
+
+  describe "patterns in custom dir override those in 'patterns/' dir" do
+    require 'tmpdir'
+    require 'tempfile'
+
+    let(:tmpdir) { Dir.mktmpdir }
+
+    before do
+      pattern_dir = File.join(LogStash::Environment::LOGSTASH_HOME, "patterns")
+      @file1 = Tempfile.new('grok', pattern_dir);  @file1.write('WORD \b[2-5]\b'); @file1.rewind
+      @file2 = Tempfile.new('grok', tmpdir);       @file2.write('WORD \b[0-1]\b'); @file2.rewind
+    end
+
+    let(:config) do
+      "filter { grok { patterns_dir => \"#{tmpdir}\" pattern => \"%{WORD:word}\" } }"
+    end
+
+    sample("message" => '0') do
+      insist { subject["tags"] } == nil
+    end
+
+    after do
+      @file1.close; @file1.unlink
+      @file2.close; @file2.unlink
+      FileUtils.remove_entry tmpdir
+    end
+  end
 
 end
