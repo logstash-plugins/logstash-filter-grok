@@ -15,7 +15,7 @@
   # and not computer consumption.
   #
   # Logstash ships with about 120 patterns by default. You can find them here:
-  # <https://github.com/logstash/logstash/tree/v%VERSION%/patterns>. You can add
+  # <https://github.com/logstash-plugins/logstash-patterns-core/tree/master/patterns>. You can add
   # your own trivially. (See the `patterns_dir` setting)
   #
   # If you need help building patterns to match your logs, you will find the
