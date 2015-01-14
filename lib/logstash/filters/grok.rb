@@ -213,7 +213,7 @@
     # will be parsed and `hello world` will overwrite the original message.
     config :overwrite, :validate => :array, :default => []
   
-    # Detect if we are running from a jarfile, pick the right path.
+    # Register default pattern paths
     @@patterns_path ||= Set.new
     @@patterns_path += [
       LogStash::Patterns::Core.path,
