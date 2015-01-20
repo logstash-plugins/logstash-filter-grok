@@ -138,7 +138,6 @@
   # `SYSLOGBASE` pattern which itself is defined by other patterns.
   class LogStash::Filters::Grok < LogStash::Filters::Base
     config_name "grok"
-    milestone 3
   
     # Specify a pattern to parse with. This will match the `message` field.
     #
