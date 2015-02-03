@@ -652,7 +652,7 @@ describe LogStash::Filters::Grok do
       pattern_dir = File.join(LogStash::Environment::LOGSTASH_HOME, "patterns")
       @file = Tempfile.new('grok', pattern_dir);
       @file.write('WORD \b[2-5]\b')
-      @file.rewind
+      @file.close
     end
 
     let(:config) do
@@ -664,7 +664,7 @@ describe LogStash::Filters::Grok do
     end
 
     after do
-      @file.close; @file.unlink
+      @file.unlink
     end
   end
 
@@ -676,8 +676,8 @@ describe LogStash::Filters::Grok do
 
     before do
       pattern_dir = File.join(LogStash::Environment::LOGSTASH_HOME, "patterns")
-      @file1 = Tempfile.new('grok', pattern_dir);  @file1.write('WORD \b[2-5]\b'); @file1.rewind
-      @file2 = Tempfile.new('grok', tmpdir);       @file2.write('WORD \b[0-1]\b'); @file2.rewind
+      @file1 = Tempfile.new('grok', pattern_dir);  @file1.write('WORD \b[2-5]\b'); @file1.close
+      @file2 = Tempfile.new('grok', tmpdir);       @file2.write('WORD \b[0-1]\b'); @file2.close
     end
 
     let(:config) do
@@ -689,8 +689,8 @@ describe LogStash::Filters::Grok do
     end
 
     after do
-      @file1.close; @file1.unlink
-      @file2.close; @file2.unlink
+      @file1.unlink
+      @file2.unlink
       FileUtils.remove_entry tmpdir
     end
   end
