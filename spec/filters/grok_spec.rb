@@ -1,6 +1,5 @@
 # encoding: utf-8
-require "logstash/devutils/rspec/spec_helper"
-require "logstash/filters/grok"
+require 'spec_helper'
 
 describe LogStash::Filters::Grok do
 
@@ -648,8 +647,11 @@ describe LogStash::Filters::Grok do
     require 'tmpdir'
     require 'tempfile'
 
+    let(:pattern_dir) { File.join(LogStash::Environment::LOGSTASH_HOME, "patterns") }
+    let(:has_pattern_dir?) { Dir.exist?(pattern_dir) }
+
     before do
-      pattern_dir = File.join(LogStash::Environment::LOGSTASH_HOME, "patterns")
+      FileUtils.mkdir(pattern_dir) unless has_pattern_dir?
       @file = Tempfile.new('grok', pattern_dir);
       @file.write('WORD \b[2-5]\b')
       @file.close
@@ -665,6 +667,7 @@ describe LogStash::Filters::Grok do
 
     after do
       @file.unlink
+      FileUtils.rm_rf(pattern_dir) if has_pattern_dir?
     end
   end
 
@@ -673,9 +676,11 @@ describe LogStash::Filters::Grok do
     require 'tempfile'
 
     let(:tmpdir) { Dir.mktmpdir }
+    let(:pattern_dir) { File.join(LogStash::Environment::LOGSTASH_HOME, "patterns") }
+    let(:has_pattern_dir?) { Dir.exist?(pattern_dir) }
 
     before do
-      pattern_dir = File.join(LogStash::Environment::LOGSTASH_HOME, "patterns")
+      FileUtils.mkdir(pattern_dir) unless has_pattern_dir?
       @file1 = Tempfile.new('grok', pattern_dir);  @file1.write('WORD \b[2-5]\b'); @file1.close
       @file2 = Tempfile.new('grok', tmpdir);       @file2.write('WORD \b[0-1]\b'); @file2.close
     end
@@ -692,6 +697,7 @@ describe LogStash::Filters::Grok do
       @file1.unlink
       @file2.unlink
       FileUtils.remove_entry tmpdir
+      FileUtils.rm_rf(pattern_dir) unless has_pattern_dir?
     end
   end
 
