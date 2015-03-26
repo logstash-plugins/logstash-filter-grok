@@ -319,9 +319,9 @@
       matched = false
       groks.each do |grok|
         # Convert anything else to string (number, hash, etc)
-        matched = grok.match_and_capture(input.to_s) do |field, value|
+        matched = grok.match_and_capture(input.to_s) do |field, coerced_value, original_value|
           matched = true
-          handle(field, value, event)
+          handle(field, coerced_value, original_value, event)
         end
         break if matched and @break_on_match
       end
@@ -329,20 +329,20 @@
     end
   
     private
-    def handle(field, value, event)
-      return if (value.nil? || (value.is_a?(String) && value.empty?)) unless @keep_empty_captures
+    def handle(field, coerced_value, original_value, event)
+      return if (original_value.nil? || (original_value.is_a?(String) && original_value.empty?)) unless @keep_empty_captures
   
       if @overwrite.include?(field)
-        event[field] = value
+        event[field] = coerced_value
       else
         v = event[field]
         if v.nil?
-          event[field] = value
+          event[field] = coerced_value
         elsif v.is_a?(Array)
-          event[field] << value
+          event[field] << coerced_value
         elsif v.is_a?(String)
           # Promote to array since we aren't overwriting.
-          event[field] = [v, value]
+          event[field] = [v, coerced_value]
         end
       end
     end
