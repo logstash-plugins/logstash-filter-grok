@@ -702,4 +702,49 @@ describe LogStash::Filters::Grok do
     end
   end
 
+  describe  "grok with nil coerced value" do
+    config <<-CONFIG
+      filter {
+        grok {
+          match => { "message" => "test (N/A|%{BASE10NUM:duration:float}ms)" }
+        }
+      }
+    CONFIG
+
+    sample "test 28.4ms" do
+      insist { subject["duration"] } == 28.4
+      insist { subject["tags"] }.nil?
+    end
+
+    sample "test N/A" do
+      insist { subject["duration"] }.nil?
+      insist { subject["tags"] }.nil?
+    end
+
+    sample "test abc" do
+      insist { subject["duration"] }.nil?
+      insist { subject["tags"] } == ["_grokparsefailure"]
+    end
+  end
+
+  describe  "grok with no coercion" do
+    config <<-CONFIG
+      filter {
+        grok {
+          match => { "message" => "test (N/A|%{BASE10NUM:duration}ms)" }
+        }
+      }
+    CONFIG
+
+    sample "test 28.4ms" do
+      insist { subject["duration"] } == "28.4"
+      insist { subject["tags"] }.nil?
+    end
+
+    sample "test N/A" do
+      insist { subject["duration"] }.nil?
+      insist { subject["tags"] }.nil?
+    end
+  end
+
 end
