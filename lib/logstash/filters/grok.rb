@@ -19,7 +19,7 @@
   # your own trivially. (See the `patterns_dir` setting)
   #
   # If you need help building patterns to match your logs, you will find the
-  # <http://grokdebug.herokuapp.com> too quite useful!
+  # <http://grokdebug.herokuapp.com> and <http://grokconstructor.appspot.com/> applications quite useful!
   #
   # ==== Grok Basics
   #
@@ -83,8 +83,8 @@
   #
   # Grok sits on top of regular expressions, so any regular expressions are valid
   # in grok as well. The regular expression library is Oniguruma, and you can see
-  # the full supported regexp syntax [on the Onigiruma
-  # site](http://www.geocities.jp/kosako3/oniguruma/doc/RE.txt).
+  # the full supported regexp syntax http://www.geocities.jp/kosako3/oniguruma/doc/RE.txt[on the Onigiruma
+  # site].
   #
   # ==== Custom Patterns
   #
@@ -153,12 +153,6 @@
     #       grok { match => { "message" => "Duration: %{NUMBER:duration}" } }
     #     }
     #
-    # Alternatively, using the old array syntax:
-    # [source,ruby]
-    #     filter {
-    #       grok { match => [ "message", "Duration: %{NUMBER:duration}" ] }
-    #     }
-    #
     # If you need to match multiple patterns against a single field, the value can be an array of patterns
     # [source,ruby]
     #     filter {
@@ -169,9 +163,13 @@
     config :match, :validate => :hash, :default => {}
   
     #
-    # logstash ships by default with a bunch of patterns, so you don't
+    # Logstash ships by default with a bunch of patterns, so you don't
     # necessarily need to define this yourself unless you are adding additional
-    # patterns.
+    # patterns. You can point to multiple pattern directories using this setting
+    # Note that Grok will read all files in the directory and assume its a pattern
+    # file (including any tilde backup files)
+    # [source,ruby]
+    #     patterns_dir => ["/opt/logstash/patterns", "/opt/logstash/extra_patterns"] 
     #
     # Pattern files are plain text with format:
     # [source,ruby]
