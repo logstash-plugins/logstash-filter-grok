@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
 
   s.name            = 'logstash-filter-grok'
-  s.version         = '0.1.11'
+  s.version         = '1.0.0'
   s.licenses        = ['Apache License (2.0)']
   s.summary         = "Parse arbitrary text and structure it."
   s.description     = "This gem is a logstash plugin required to be installed on top of the Logstash core pipeline using $LS_HOME/bin/plugin install gemname. This gem is not a stand-alone program"
