@@ -120,7 +120,7 @@
   # [source,ruby]
   #     filter {
   #       grok {
-  #         patterns_dir => "./patterns"
+  #         patterns_dir => ["./patterns"]
   #         match => { "message" => "%{SYSLOGBASE} %{POSTFIX_QUEUEID:queue_id}: %{GREEDYDATA:syslog_message}" }
   #       }
   #     }
