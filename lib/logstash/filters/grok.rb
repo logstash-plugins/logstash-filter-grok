@@ -275,7 +275,7 @@
   
     public
     def filter(event)
-      return unless filter?(event)
+      
   
       matched = false
       done = false
