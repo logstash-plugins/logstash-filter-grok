@@ -710,6 +710,32 @@ describe LogStash::Filters::Grok do
     end
   end
 
+  describe "patterns with file glob" do
+    require 'tmpdir'
+    require 'tempfile'
+
+    let(:tmpdir) { Dir.mktmpdir(nil, "/tmp") }
+
+    before do
+      @file3 = Tempfile.new(['grok', '.pattern'], tmpdir);     @file3.write('WORD \b[0-1]\b'); @file3.close
+      @file4 = Tempfile.new(['grok', '.pattern.old'], tmpdir); @file4.write('WORD \b[2-5]\b'); @file4.close
+    end
+
+    let(:config) do
+      "filter { grok { patterns_dir => \"#{tmpdir}\" patterns_files_glob => \"*.pattern\" pattern => \"%{WORD:word}\" } }"
+    end
+
+    sample("message" => '0') do
+      insist { subject["tags"] } == nil
+    end
+
+    after do
+      @file3.unlink
+      @file4.unlink
+      FileUtils.remove_entry tmpdir
+    end
+  end
+
   describe  "grok with nil coerced value" do
     config <<-CONFIG
       filter {
