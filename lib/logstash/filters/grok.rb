@@ -166,8 +166,8 @@
     # Logstash ships by default with a bunch of patterns, so you don't
     # necessarily need to define this yourself unless you are adding additional
     # patterns. You can point to multiple pattern directories using this setting
-    # Note that Grok will read all files in the directory and assume its a pattern
-    # file (including any tilde backup files)
+    # Note that Grok will read all files in the directory matching the patterns_files_glob
+    # and assume its a pattern file (including any tilde backup files)
     # [source,ruby]
     #     patterns_dir => ["/opt/logstash/patterns", "/opt/logstash/extra_patterns"] 
     #
@@ -179,7 +179,11 @@
     # [source,ruby]
     #     NUMBER \d+
     config :patterns_dir, :validate => :array, :default => []
-  
+
+    # Glob pattern, used to select the pattern files in the directories
+    # specified by patterns_dir
+    config :patterns_files_glob, :validate => :string, :default => "*"
+
     # Break on first match. The first successful match by grok will result in the
     # filter being finished. If you want grok to try all patterns (maybe you are
     # parsing different things), then set this to false.
@@ -241,18 +245,8 @@
   
       # Have @@patterns_path show first. Last-in pattern definitions win; this
       # will let folks redefine built-in patterns at runtime.
-      @patterns_dir = @@patterns_path.to_a + @patterns_dir
-      @logger.info? and @logger.info("Grok patterns path", :patterns_dir => @patterns_dir)
-      @patterns_dir.each do |path|
-        if File.directory?(path)
-          path = File.join(path, "*")
-        end
-  
-        Dir.glob(path).each do |file|
-          @logger.info? and @logger.info("Grok loading patterns from file", :path => file)
-          @patternfiles << file
-        end
-      end
+      @patternfiles += patterns_files_from_paths(@@patterns_path.to_a, "*")
+      @patternfiles += patterns_files_from_paths(@patterns_dir, @patterns_files_glob)
   
       @patterns = Hash.new { |h,k| h[k] = [] }
   
@@ -351,7 +345,24 @@
         end
       end
     end
-  
+
+    private
+    def patterns_files_from_paths(paths, glob)
+      patternfiles = []
+      @logger.info? and @logger.info("Grok patterns path", :paths => paths)
+      paths.each do |path|
+        if File.directory?(path)
+          path = File.join(path, glob)
+        end
+
+        Dir.glob(path).each do |file|
+          @logger.info? and @logger.info("Grok loading patterns from file", :path => file)
+          patternfiles << file
+        end
+      end
+      patternfiles
+    end # def patterns_files_from_paths
+
     private
     def add_patterns_from_files(paths, grok)
       paths.each do |path|
