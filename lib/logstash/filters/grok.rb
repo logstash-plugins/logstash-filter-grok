@@ -83,7 +83,7 @@
   #
   # Grok sits on top of regular expressions, so any regular expressions are valid
   # in grok as well. The regular expression library is Oniguruma, and you can see
-  # the full supported regexp syntax https://github.com/kkos/oniguruma/blob/master/doc/RE[on the Onigiruma
+  # the full supported regexp syntax https://github.com/kkos/oniguruma/blob/master/doc/RE[on the Oniguruma
   # site].
   #
   # ==== Custom Patterns
