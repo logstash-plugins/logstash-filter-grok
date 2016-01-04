@@ -4,7 +4,7 @@
   require "logstash/environment"
   require "logstash/patterns/core"
   require "set"
-  
+
   # Parse arbitrary text and structure it.
   #
   # Grok is currently the best way in logstash to parse crappy unstructured log
@@ -72,7 +72,7 @@
   #     }
   #
   # After the grok filter, the event will have a few extra fields in it:
-  # 
+  #
   # * `client: 55.3.244.1`
   # * `method: GET`
   # * `request: /index.html`
@@ -83,7 +83,7 @@
   #
   # Grok sits on top of regular expressions, so any regular expressions are valid
   # in grok as well. The regular expression library is Oniguruma, and you can see
-  # the full supported regexp syntax https://github.com/kkos/oniguruma/blob/master/doc/RE[on the Onigiruma
+  # the full supported regexp syntax https://github.com/kkos/oniguruma/blob/master/doc/RE[on the Oniguruma
   # site].
   #
   # ==== Custom Patterns
@@ -138,13 +138,13 @@
   # `SYSLOGBASE` pattern which itself is defined by other patterns.
   class LogStash::Filters::Grok < LogStash::Filters::Base
     config_name "grok"
-  
+
     # Specify a pattern to parse with. This will match the `message` field.
     #
     # If you want to match other fields than message, use the `match` setting.
     # Multiple patterns is fine.
     config :pattern, :validate => :array, :deprecated => "You should use this instead: match => { \"message\" => \"your pattern here\" }"
-  
+
     # A hash of matches of field => value
     #
     # For example:
@@ -159,9 +159,9 @@
     #       grok { match => { "message" => [ "Duration: %{NUMBER:duration}", "Speed: %{NUMBER:speed}" ] } }
     #     }
 
-    #  
+    #
     config :match, :validate => :hash, :default => {}
-  
+
     #
     # Logstash ships by default with a bunch of patterns, so you don't
     # necessarily need to define this yourself unless you are adding additional
@@ -169,7 +169,7 @@
     # Note that Grok will read all files in the directory matching the patterns_files_glob
     # and assume its a pattern file (including any tilde backup files)
     # [source,ruby]
-    #     patterns_dir => ["/opt/logstash/patterns", "/opt/logstash/extra_patterns"] 
+    #     patterns_dir => ["/opt/logstash/patterns", "/opt/logstash/extra_patterns"]
     #
     # Pattern files are plain text with format:
     # [source,ruby]
@@ -188,21 +188,21 @@
     # filter being finished. If you want grok to try all patterns (maybe you are
     # parsing different things), then set this to false.
     config :break_on_match, :validate => :boolean, :default => true
-  
+
     # If `true`, only store named captures from grok.
     config :named_captures_only, :validate => :boolean, :default => true
-  
+
     # If `true`, keep empty captures as event fields.
     config :keep_empty_captures, :validate => :boolean, :default => false
-  
+
     # If `true`, make single-value fields simply that value, not an array
     # containing that one value.
     config :singles, :validate => :boolean, :default => true, :deprecated => "This behavior is the default now, you don't need to set it."
-  
+
     # Append values to the `tags` field when there has been no
     # successful match
     config :tag_on_failure, :validate => :array, :default => ["_grokparsefailure"]
-  
+
     # The fields to overwrite.
     #
     # This allows you to overwrite a value in a field that already exists.
@@ -220,14 +220,14 @@
     # In this case, a line like `May 29 16:37:11 sadness logger: hello world`
     # will be parsed and `hello world` will overwrite the original message.
     config :overwrite, :validate => :array, :default => []
-  
+
     # Register default pattern paths
     @@patterns_path ||= Set.new
     @@patterns_path += [
       LogStash::Patterns::Core.path,
       LogStash::Environment.pattern_path("*")
     ]
-  
+
     public
     def initialize(params)
       super(params)
@@ -236,25 +236,25 @@
       # a cache of capture name handler methods.
       @handlers = {}
     end
-  
+
     public
     def register
       require "grok-pure" # rubygem 'jls-grok'
-  
+
       @patternfiles = []
-  
+
       # Have @@patterns_path show first. Last-in pattern definitions win; this
       # will let folks redefine built-in patterns at runtime.
       @patternfiles += patterns_files_from_paths(@@patterns_path.to_a, "*")
       @patternfiles += patterns_files_from_paths(@patterns_dir, @patterns_files_glob)
   
       @patterns = Hash.new { |h,k| h[k] = [] }
-  
+
       @logger.info? and @logger.info("Match data", :match => @match)
-  
+
       @match.each do |field, patterns|
         patterns = [patterns] if patterns.is_a?(String)
-  
+
         @logger.info? and @logger.info("Grok compile", :field => field, :patterns => patterns)
         patterns.each do |pattern|
           @logger.debug? and @logger.debug("regexp: #{@type}/#{field}", :pattern => pattern)
@@ -266,14 +266,14 @@
         end
       end # @match.each
     end # def register
-  
+
     public
     def filter(event)
-      
-  
+
+
       matched = false
       done = false
-  
+
       @logger.debug? and @logger.debug("Running grok filter", :event => event);
       @patterns.each do |field, groks|
         if match(groks, field, event)
@@ -282,21 +282,16 @@
         end
         #break if done
       end # @patterns.each
-  
+
       if matched
         filter_matched(event)
       else
-        # Tag this event if we can't parse it. We can use this later to
-        # reparse+reindex logs if we improve the patterns given.
-        @tag_on_failure.each do |tag|
-          event["tags"] ||= []
-          event["tags"] << tag unless event["tags"].include?(tag)
-        end
+        @tag_on_failure.each{|tag| event.tag(tag)}
       end
-  
+
       @logger.debug? and @logger.debug("Event now: ", :event => event)
     end # def filter
-  
+
     private
     def match(groks, field, event)
       input = event[field]
@@ -312,7 +307,7 @@
     rescue StandardError => e
       @logger.warn("Grok regexp threw exception", :exception => e.message)
     end
-  
+
     private
     def match_against_groks(groks, input, event)
       matched = false
@@ -326,11 +321,11 @@
       end
       return matched
     end
-  
+
     private
     def handle(field, value, event)
       return if (value.nil? || (value.is_a?(String) && value.empty?)) unless @keep_empty_captures
-  
+
       if @overwrite.include?(field)
         event[field] = value
       else
@@ -338,7 +333,12 @@
         if v.nil?
           event[field] = value
         elsif v.is_a?(Array)
-          event[field] << value
+          # do not replace the code below with:
+          #   event[field] << value
+          # this assumes implementation specific feature of returning a mutable object
+          # from a field ref which should not be assumed and will change in the future.
+          v << value
+          event[field] = v
         elsif v.is_a?(String)
           # Promote to array since we aren't overwriting.
           event[field] = [v, value]
@@ -372,5 +372,5 @@
         grok.add_patterns_from_file(path)
       end
     end # def add_patterns_from_files
-  
+
   end # class LogStash::Filters::Grok
