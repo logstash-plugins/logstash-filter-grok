@@ -661,7 +661,7 @@ describe LogStash::Filters::Grok do
 
     before do
       FileUtils.mkdir(pattern_dir) unless has_pattern_dir?
-      @file = Tempfile.new('grok', pattern_dir);
+      @file = Tempfile.new('grok', pattern_dir)
       @file.write('WORD \b[2-5]\b')
       @file.close
     end
@@ -690,8 +690,12 @@ describe LogStash::Filters::Grok do
 
     before do
       FileUtils.mkdir(pattern_dir) unless has_pattern_dir?
-      @file1 = Tempfile.new('grok', pattern_dir);  @file1.write('WORD \b[2-5]\b'); @file1.close
-      @file2 = Tempfile.new('grok', tmpdir);       @file2.write('WORD \b[0-1]\b'); @file2.close
+      @file1 = Tempfile.new('grok', pattern_dir)
+      @file1.write('WORD \b[2-5]\b')
+      @file1.close
+      @file2 = Tempfile.new('grok', tmpdir)
+      @file2.write('WORD \b[0-1]\b')
+      @file2.close
     end
 
     let(:config) do
@@ -717,8 +721,12 @@ describe LogStash::Filters::Grok do
     let(:tmpdir) { Dir.mktmpdir(nil, "/tmp") }
 
     before do
-      @file3 = Tempfile.new(['grok', '.pattern'], tmpdir);     @file3.write('WORD \b[0-1]\b'); @file3.close
-      @file4 = Tempfile.new(['grok', '.pattern.old'], tmpdir); @file4.write('WORD \b[2-5]\b'); @file4.close
+      @file3 = Tempfile.new(['grok', '.pattern'], tmpdir)
+      @file3.write('WORD \b[0-1]\b')
+      @file3.close
+      @file4 = Tempfile.new(['grok', '.pattern.old'], tmpdir)
+      @file4.write('WORD \b[2-5]\b')
+      @file4.close
     end
 
     let(:config) do
