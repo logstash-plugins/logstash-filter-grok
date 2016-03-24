@@ -124,7 +124,7 @@
   #         match => { "message" => "%{SYSLOGBASE} %{POSTFIX_QUEUEID:queue_id}: %{GREEDYDATA:syslog_message}" }
   #       }
   #     }
-  #
+  # Note: `patters_dir` value is relative to where you run logstash from, and NOT relative to the config file/directory. 
   # The above will match and result in the following fields:
   #
   # * `timestamp: Jan  1 06:25:43`
