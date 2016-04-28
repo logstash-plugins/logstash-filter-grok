@@ -36,12 +36,12 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "Mar 16 00:01:25 evita postfix/smtpd[1713]: connect from camomile.cloud9.net[168.100.1.3]" do
-      insist { subject["tags"] }.nil?
-      insist { subject["logsource"] } == "evita"
-      insist { subject["timestamp"] } == "Mar 16 00:01:25"
-      insist { subject["message"] } == "connect from camomile.cloud9.net[168.100.1.3]"
-      insist { subject["program"] } == "postfix/smtpd"
-      insist { subject["pid"] } == "1713"
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("logsource") } == "evita"
+      insist { subject.get("timestamp") } == "Mar 16 00:01:25"
+      insist { subject.get("message") } == "connect from camomile.cloud9.net[168.100.1.3]"
+      insist { subject.get("program") } == "postfix/smtpd"
+      insist { subject.get("pid") } == "1713"
     end
   end
 
@@ -58,120 +58,120 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug 4123 - [id1 foo=\"bar\"][id2 baz=\"something\"] Hello, syslog." do
-      insist { subject["tags"] }.nil?
-      insist { subject["syslog5424_pri"] } == "191"
-      insist { subject["syslog5424_ver"] } == "1"
-      insist { subject["syslog5424_ts"] } == "2009-06-30T18:30:00+02:00"
-      insist { subject["syslog5424_host"] } == "paxton.local"
-      insist { subject["syslog5424_app"] } == "grokdebug"
-      insist { subject["syslog5424_proc"] } == "4123"
-      insist { subject["syslog5424_msgid"] } == nil
-      insist { subject["syslog5424_sd"] } == "[id1 foo=\"bar\"][id2 baz=\"something\"]"
-      insist { subject["syslog5424_msg"] } == "Hello, syslog."
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("syslog5424_pri") } == "191"
+      insist { subject.get("syslog5424_ver") } == "1"
+      insist { subject.get("syslog5424_ts") } == "2009-06-30T18:30:00+02:00"
+      insist { subject.get("syslog5424_host") } == "paxton.local"
+      insist { subject.get("syslog5424_app") } == "grokdebug"
+      insist { subject.get("syslog5424_proc") } == "4123"
+      insist { subject.get("syslog5424_msgid") } == nil
+      insist { subject.get("syslog5424_sd") } == "[id1 foo=\"bar\"][id2 baz=\"something\"]"
+      insist { subject.get("syslog5424_msg") } == "Hello, syslog."
     end
 
     sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug - - [id1 foo=\"bar\"] No process ID." do
-      insist { subject["tags"] }.nil?
-      insist { subject["syslog5424_pri"] } == "191"
-      insist { subject["syslog5424_ver"] } == "1"
-      insist { subject["syslog5424_ts"] } == "2009-06-30T18:30:00+02:00"
-      insist { subject["syslog5424_host"] } == "paxton.local"
-      insist { subject["syslog5424_app"] } == "grokdebug"
-      insist { subject["syslog5424_proc"] } == nil
-      insist { subject["syslog5424_msgid"] } == nil
-      insist { subject["syslog5424_sd"] } == "[id1 foo=\"bar\"]"
-      insist { subject["syslog5424_msg"] } == "No process ID."
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("syslog5424_pri") } == "191"
+      insist { subject.get("syslog5424_ver") } == "1"
+      insist { subject.get("syslog5424_ts") } == "2009-06-30T18:30:00+02:00"
+      insist { subject.get("syslog5424_host") } == "paxton.local"
+      insist { subject.get("syslog5424_app") } == "grokdebug"
+      insist { subject.get("syslog5424_proc") } == nil
+      insist { subject.get("syslog5424_msgid") } == nil
+      insist { subject.get("syslog5424_sd") } == "[id1 foo=\"bar\"]"
+      insist { subject.get("syslog5424_msg") } == "No process ID."
     end
 
     sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug 4123 - - No structured data." do
-      insist { subject["tags"] }.nil?
-      insist { subject["syslog5424_pri"] } == "191"
-      insist { subject["syslog5424_ver"] } == "1"
-      insist { subject["syslog5424_ts"] } == "2009-06-30T18:30:00+02:00"
-      insist { subject["syslog5424_host"] } == "paxton.local"
-      insist { subject["syslog5424_app"] } == "grokdebug"
-      insist { subject["syslog5424_proc"] } == "4123"
-      insist { subject["syslog5424_msgid"] } == nil
-      insist { subject["syslog5424_sd"] } == nil
-      insist { subject["syslog5424_msg"] } == "No structured data."
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("syslog5424_pri") } == "191"
+      insist { subject.get("syslog5424_ver") } == "1"
+      insist { subject.get("syslog5424_ts") } == "2009-06-30T18:30:00+02:00"
+      insist { subject.get("syslog5424_host") } == "paxton.local"
+      insist { subject.get("syslog5424_app") } == "grokdebug"
+      insist { subject.get("syslog5424_proc") } == "4123"
+      insist { subject.get("syslog5424_msgid") } == nil
+      insist { subject.get("syslog5424_sd") } == nil
+      insist { subject.get("syslog5424_msg") } == "No structured data."
     end
 
     sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug - - - No PID or SD." do
-      insist { subject["tags"] }.nil?
-      insist { subject["syslog5424_pri"] } == "191"
-      insist { subject["syslog5424_ver"] } == "1"
-      insist { subject["syslog5424_ts"] } == "2009-06-30T18:30:00+02:00"
-      insist { subject["syslog5424_host"] } == "paxton.local"
-      insist { subject["syslog5424_app"] } == "grokdebug"
-      insist { subject["syslog5424_proc"] } == nil
-      insist { subject["syslog5424_msgid"] } == nil
-      insist { subject["syslog5424_sd"] } == nil
-      insist { subject["syslog5424_msg"] } == "No PID or SD."
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("syslog5424_pri") } == "191"
+      insist { subject.get("syslog5424_ver") } == "1"
+      insist { subject.get("syslog5424_ts") } == "2009-06-30T18:30:00+02:00"
+      insist { subject.get("syslog5424_host") } == "paxton.local"
+      insist { subject.get("syslog5424_app") } == "grokdebug"
+      insist { subject.get("syslog5424_proc") } == nil
+      insist { subject.get("syslog5424_msgid") } == nil
+      insist { subject.get("syslog5424_sd") } == nil
+      insist { subject.get("syslog5424_msg") } == "No PID or SD."
     end
 
     sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug 4123 -  Missing structured data." do
-      insist { subject["tags"] }.nil?
-      insist { subject["syslog5424_pri"] } == "191"
-      insist { subject["syslog5424_ver"] } == "1"
-      insist { subject["syslog5424_ts"] } == "2009-06-30T18:30:00+02:00"
-      insist { subject["syslog5424_host"] } == "paxton.local"
-      insist { subject["syslog5424_app"] } == "grokdebug"
-      insist { subject["syslog5424_proc"] } == "4123"
-      insist { subject["syslog5424_msgid"] } == nil
-      insist { subject["syslog5424_sd"] } == nil
-      insist { subject["syslog5424_msg"] } == "Missing structured data."
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("syslog5424_pri") } == "191"
+      insist { subject.get("syslog5424_ver") } == "1"
+      insist { subject.get("syslog5424_ts") } == "2009-06-30T18:30:00+02:00"
+      insist { subject.get("syslog5424_host") } == "paxton.local"
+      insist { subject.get("syslog5424_app") } == "grokdebug"
+      insist { subject.get("syslog5424_proc") } == "4123"
+      insist { subject.get("syslog5424_msgid") } == nil
+      insist { subject.get("syslog5424_sd") } == nil
+      insist { subject.get("syslog5424_msg") } == "Missing structured data."
     end
 
     sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug  4123 - - Additional spaces." do
-      insist { subject["tags"] }.nil?
-      insist { subject["syslog5424_pri"] } == "191"
-      insist { subject["syslog5424_ver"] } == "1"
-      insist { subject["syslog5424_ts"] } == "2009-06-30T18:30:00+02:00"
-      insist { subject["syslog5424_host"] } == "paxton.local"
-      insist { subject["syslog5424_app"] } == "grokdebug"
-      insist { subject["syslog5424_proc"] } == "4123"
-      insist { subject["syslog5424_msgid"] } == nil
-      insist { subject["syslog5424_sd"] } == nil
-      insist { subject["syslog5424_msg"] } == "Additional spaces."
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("syslog5424_pri") } == "191"
+      insist { subject.get("syslog5424_ver") } == "1"
+      insist { subject.get("syslog5424_ts") } == "2009-06-30T18:30:00+02:00"
+      insist { subject.get("syslog5424_host") } == "paxton.local"
+      insist { subject.get("syslog5424_app") } == "grokdebug"
+      insist { subject.get("syslog5424_proc") } == "4123"
+      insist { subject.get("syslog5424_msgid") } == nil
+      insist { subject.get("syslog5424_sd") } == nil
+      insist { subject.get("syslog5424_msg") } == "Additional spaces."
     end
 
     sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug  4123 -  Additional spaces and missing SD." do
-      insist { subject["tags"] }.nil?
-      insist { subject["syslog5424_pri"] } == "191"
-      insist { subject["syslog5424_ver"] } == "1"
-      insist { subject["syslog5424_ts"] } == "2009-06-30T18:30:00+02:00"
-      insist { subject["syslog5424_host"] } == "paxton.local"
-      insist { subject["syslog5424_app"] } == "grokdebug"
-      insist { subject["syslog5424_proc"] } == "4123"
-      insist { subject["syslog5424_msgid"] } == nil
-      insist { subject["syslog5424_sd"] } == nil
-      insist { subject["syslog5424_msg"] } == "Additional spaces and missing SD."
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("syslog5424_pri") } == "191"
+      insist { subject.get("syslog5424_ver") } == "1"
+      insist { subject.get("syslog5424_ts") } == "2009-06-30T18:30:00+02:00"
+      insist { subject.get("syslog5424_host") } == "paxton.local"
+      insist { subject.get("syslog5424_app") } == "grokdebug"
+      insist { subject.get("syslog5424_proc") } == "4123"
+      insist { subject.get("syslog5424_msgid") } == nil
+      insist { subject.get("syslog5424_sd") } == nil
+      insist { subject.get("syslog5424_msg") } == "Additional spaces and missing SD."
     end
 
     sample "<30>1 2014-04-04T16:44:07+02:00 osctrl01 dnsmasq-dhcp 8048 - -  Appname contains a dash" do
-      insist { subject["tags"] }.nil?
-      insist { subject["syslog5424_pri"] } == "30"
-      insist { subject["syslog5424_ver"] } == "1"
-      insist { subject["syslog5424_ts"] } == "2014-04-04T16:44:07+02:00"
-      insist { subject["syslog5424_host"] } == "osctrl01"
-      insist { subject["syslog5424_app"] } == "dnsmasq-dhcp"
-      insist { subject["syslog5424_proc"] } == "8048"
-      insist { subject["syslog5424_msgid"] } == nil
-      insist { subject["syslog5424_sd"] } == nil
-      insist { subject["syslog5424_msg"] } == "Appname contains a dash"
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("syslog5424_pri") } == "30"
+      insist { subject.get("syslog5424_ver") } == "1"
+      insist { subject.get("syslog5424_ts") } == "2014-04-04T16:44:07+02:00"
+      insist { subject.get("syslog5424_host") } == "osctrl01"
+      insist { subject.get("syslog5424_app") } == "dnsmasq-dhcp"
+      insist { subject.get("syslog5424_proc") } == "8048"
+      insist { subject.get("syslog5424_msgid") } == nil
+      insist { subject.get("syslog5424_sd") } == nil
+      insist { subject.get("syslog5424_msg") } == "Appname contains a dash"
     end
 
     sample "<30>1 2014-04-04T16:44:07+02:00 osctrl01 - 8048 - -  Appname is nil" do
-      insist { subject["tags"] }.nil?
-      insist { subject["syslog5424_pri"] } == "30"
-      insist { subject["syslog5424_ver"] } == "1"
-      insist { subject["syslog5424_ts"] } == "2014-04-04T16:44:07+02:00"
-      insist { subject["syslog5424_host"] } == "osctrl01"
-      insist { subject["syslog5424_app"] } == nil
-      insist { subject["syslog5424_proc"] } == "8048"
-      insist { subject["syslog5424_msgid"] } == nil
-      insist { subject["syslog5424_sd"] } == nil
-      insist { subject["syslog5424_msg"] } == "Appname is nil"
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("syslog5424_pri") } == "30"
+      insist { subject.get("syslog5424_ver") } == "1"
+      insist { subject.get("syslog5424_ts") } == "2014-04-04T16:44:07+02:00"
+      insist { subject.get("syslog5424_host") } == "osctrl01"
+      insist { subject.get("syslog5424_app") } == nil
+      insist { subject.get("syslog5424_proc") } == "8048"
+      insist { subject.get("syslog5424_msgid") } == nil
+      insist { subject.get("syslog5424_sd") } == nil
+      insist { subject.get("syslog5424_msg") } == "Appname is nil"
     end
   end
 
@@ -186,7 +186,7 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample("message" => [ "hello 12345", "world 23456" ]) do
-      insist { subject["NUMBER"] } == [ "12345", "23456" ]
+      insist { subject.get("NUMBER") } == [ "12345", "23456" ]
     end
   end
 
@@ -201,10 +201,10 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "400 454.33" do
-      insist { subject["foo"] } == 400
-      insist { subject["foo"] }.is_a?(Fixnum)
-      insist { subject["bar"] } == 454.33
-      insist { subject["bar"] }.is_a?(Float)
+      insist { subject.get("foo") } == 400
+      insist { subject.get("foo") }.is_a?(Fixnum)
+      insist { subject.get("bar") } == 454.33
+      insist { subject.get("bar") }.is_a?(Float)
     end
   end
 
@@ -220,7 +220,7 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "hello 1234" do
-      insist { subject["FIZZLE"] } == "1234"
+      insist { subject.get("FIZZLE") } == "1234"
     end
   end
 
@@ -237,8 +237,8 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample("message" => "hello world", "examplefield" => "12345") do
-      insist { subject["examplefield"] } == "12345"
-      insist { subject["word"] } == "hello"
+      insist { subject.get("examplefield") } == "12345"
+      insist { subject.get("word") } == "hello"
     end
   end
 
@@ -254,12 +254,12 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "matchme 1234" do
-      insist { subject["tags"] }.nil?
-      insist { subject["new_field"] } == "1234"
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("new_field") } == "1234"
     end
 
     sample "this will not be matched" do
-      insist { subject["tags"] }.include?("_grokparsefailure")
+      insist { subject.get("tags") }.include?("_grokparsefailure")
       reject { subject }.include?("new_field")
     end
   end
@@ -275,7 +275,7 @@ describe LogStash::Filters::Grok do
       CONFIG
 
       sample "1=test" do
-        insist { subject["tags"] }.nil?
+        insist { subject.get("tags") }.nil?
         insist { subject }.include?("foo1")
 
         # Since 'foo2' was not captured, it must not be present in the event.
@@ -294,7 +294,7 @@ describe LogStash::Filters::Grok do
       CONFIG
 
       sample "1=test" do
-        insist { subject["tags"] }.nil?
+        insist { subject.get("tags") }.nil?
         # use .to_hash for this test, for now, because right now
         # the Event.include? returns false for missing fields as well
         # as for fields with nil values.
@@ -317,9 +317,9 @@ describe LogStash::Filters::Grok do
 
     sample "Hello World, yo!" do
       insist { subject }.include?("WORD")
-      insist { subject["WORD"] } == "World"
+      insist { subject.get("WORD") } == "World"
       insist { subject }.include?("foo")
-      insist { subject["foo"] } == "yo"
+      insist { subject.get("foo") } == "yo"
     end
   end
 
@@ -334,8 +334,8 @@ describe LogStash::Filters::Grok do
         }
       CONFIG
       sample "hello world" do
-        insist { subject["tags"] }.nil?
-        insist { subject["foo"] } == "hello"
+        insist { subject.get("tags") }.nil?
+        insist { subject.get("foo") } == "hello"
       end
     end
 
@@ -350,8 +350,8 @@ describe LogStash::Filters::Grok do
       CONFIG
 
       sample "fancy 12-12-12 12:12:12" do
-        insist { subject["tags"] }.nil?
-        insist { subject["timestamp"] } == "12-12-12 12:12:12"
+        insist { subject.get("tags") }.nil?
+        insist { subject.get("timestamp") } == "12-12-12 12:12:12"
       end
     end
   end
@@ -367,8 +367,8 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample("status" => 403) do
-      reject { subject["tags"] }.include?("_grokparsefailure")
-      insist { subject["tags"] }.include?("four_oh_three")
+      reject { subject.get("tags") }.include?("_grokparsefailure")
+      insist { subject.get("tags") }.include?("four_oh_three")
     end
   end
 
@@ -383,8 +383,8 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample("version" => 1.0) do
-      insist { subject["tags"] }.include?("one_point_oh")
-      insist { subject["tags"] }.include?("one_point_oh")
+      insist { subject.get("tags") }.include?("one_point_oh")
+      insist { subject.get("tags") }.include?("one_point_oh")
     end
   end
 
@@ -411,7 +411,7 @@ describe LogStash::Filters::Grok do
     )
     log_level_names.each do |level_name|
       sample "#{level_name}: error!" do
-        insist { subject['level'] } == level_name
+        insist { subject.get("level") } == level_name
       end
     end
   end
@@ -427,11 +427,11 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "matchme 1234" do
-      insist { subject["tags"] }.nil?
+      insist { subject.get("tags") }.nil?
     end
 
     sample "this will not be matched" do
-      insist { subject["tags"] }.include?("false")
+      insist { subject.get("tags") }.include?("false")
     end
   end
 
@@ -446,7 +446,7 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "11/01/01" do
-      insist { subject["stimestamp"] } == "11/01/01"
+      insist { subject.get("stimestamp") } == "11/01/01"
     end
   end
 
@@ -461,7 +461,7 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "hello world" do
-      insist { subject["foo-bar"] } == "hello"
+      insist { subject.get("foo-bar") } == "hello"
     end
   end
 
@@ -509,11 +509,11 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "hello world" do
-      insist { subject["foo"] }.is_a?(String)
+      insist { subject.get("foo") }.is_a?(String)
     end
 
     sample "123 world" do
-      insist { subject["foo"] }.is_a?(String)
+      insist { subject.get("foo") }.is_a?(String)
     end
   end
 
@@ -528,8 +528,8 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample("message" => "hello world 123", "somefield" => "testme abc 999") do
-      insist { subject["foo"] } == "123"
-      insist { subject["bar"] }.nil?
+      insist { subject.get("foo") } == "123"
+      insist { subject.get("bar") }.nil?
     end
   end
 
@@ -545,8 +545,8 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample("message" => "hello world 123", "somefield" => "testme abc 999") do
-      insist { subject["foo"] } == "123"
-      insist { subject["bar"] } == "999"
+      insist { subject.get("foo") } == "123"
+      insist { subject.get("bar") } == "999"
     end
   end
 
@@ -561,16 +561,16 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "treebranch" do
-      insist { subject["name2"] } == "branch"
+      insist { subject.get("name2") } == "branch"
     end
 
     sample "bushbeard" do
-      insist { subject["name1"] } == "bush"
+      insist { subject.get("name1") } == "bush"
     end
 
     sample "treebeard" do
-      insist { subject["name1"] } == "tree"
-      insist { subject["name2"] } == "beard"
+      insist { subject.get("name1") } == "tree"
+      insist { subject.get("name2") } == "beard"
     end
   end
 
@@ -585,14 +585,14 @@ describe LogStash::Filters::Grok do
 
     # array input --
     sample("message" => ["hello world 123", "line 23"]) do
-      insist { subject["foo"] } == ["123", "23"]
-      insist { subject["tags"] }.nil?
+      insist { subject.get("foo") } == ["123", "23"]
+      insist { subject.get("tags") }.nil?
     end
 
     # array input, one of them matches
     sample("message" => ["hello world 123", "abc"]) do
-      insist { subject["foo"] } == "123"
-      insist { subject["tags"] }.nil?
+      insist { subject.get("foo") } == "123"
+      insist { subject.get("tags") }.nil?
     end
   end
 
@@ -607,16 +607,16 @@ describe LogStash::Filters::Grok do
 
     # array input --
     sample("message" => ["hello world 123", "line 23"]) do
-      insist { subject["foo"] } == ["123", "23"]
-      insist { subject["bar"] }.nil?
-      insist { subject["tags"] }.nil?
+      insist { subject.get("foo") } == ["123", "23"]
+      insist { subject.get("bar") }.nil?
+      insist { subject.get("tags") }.nil?
     end
 
     # array input, one of them matches
     sample("message" => ["hello world", "line 23"]) do
-      insist { subject["bar"] } == "hello"
-      insist { subject["foo"] } == "23"
-      insist { subject["tags"] }.nil?
+      insist { subject.get("bar") } == "hello"
+      insist { subject.get("foo") } == "23"
+      insist { subject.get("tags") }.nil?
     end
   end
 
@@ -632,16 +632,16 @@ describe LogStash::Filters::Grok do
 
     # array input --
     sample("message" => ["hello world 123", "line 23"]) do
-      insist { subject["foo"] } == ["123", "23"]
-      insist { subject["bar"] } == ["hello", "line"]
-      insist { subject["tags"] }.nil?
+      insist { subject.get("foo") } == ["123", "23"]
+      insist { subject.get("bar") } == ["hello", "line"]
+      insist { subject.get("tags") }.nil?
     end
 
     # array input, one of them matches
     sample("message" => ["hello world", "line 23"]) do
-      insist { subject["bar"] } == ["hello", "line"]
-      insist { subject["foo"] } == "23"
-      insist { subject["tags"] }.nil?
+      insist { subject.get("bar") } == ["hello", "line"]
+      insist { subject.get("foo") } == "23"
+      insist { subject.get("tags") }.nil?
     end
   end
 
@@ -656,9 +656,9 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "<22>Jan  4 07:50:46 mailmaster postfix/policy-spf[9454]: : SPF permerror (Junk encountered in record 'v=spf1 mx a:mail.domain.no ip4:192.168.0.4 �all'): Envelope-from: email@domain.no" do
-      insist { subject["tags"] }.nil?
-      insist { subject["syslog_pri"] } == "22"
-      insist { subject["syslog_program"] } == "postfix/policy-spf"
+      insist { subject.get("tags") }.nil?
+      insist { subject.get("syslog_pri") } == "22"
+      insist { subject.get("syslog_program") } == "postfix/policy-spf"
     end
   end
 
@@ -681,7 +681,7 @@ describe LogStash::Filters::Grok do
     end
 
     sample("message" => 'hello') do
-      insist { subject["tags"] } == ["_grokparsefailure"]
+      insist { subject.get("tags") } == ["_grokparsefailure"]
     end
 
     after do
@@ -713,7 +713,7 @@ describe LogStash::Filters::Grok do
     end
 
     sample("message" => '0') do
-      insist { subject["tags"] } == nil
+      insist { subject.get("tags") } == nil
     end
 
     after do
@@ -744,7 +744,7 @@ describe LogStash::Filters::Grok do
     end
 
     sample("message" => '0') do
-      insist { subject["tags"] } == nil
+      insist { subject.get("tags") } == nil
     end
 
     after do
@@ -764,18 +764,18 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "test 28.4ms" do
-      insist { subject["duration"] } == 28.4
-      insist { subject["tags"] }.nil?
+      insist { subject.get("duration") } == 28.4
+      insist { subject.get("tags") }.nil?
     end
 
     sample "test N/A" do
       insist { insist { subject.to_hash }.include?("duration") }.fails
-      insist { subject["tags"] }.nil?
+      insist { subject.get("tags") }.nil?
     end
 
     sample "test abc" do
-      insist { subject["duration"] }.nil?
-      insist { subject["tags"] } == ["_grokparsefailure"]
+      insist { subject.get("duration") }.nil?
+      insist { subject.get("tags") } == ["_grokparsefailure"]
     end
   end
 
@@ -791,7 +791,7 @@ describe LogStash::Filters::Grok do
 
     sample "test N/A" do
       insist { subject.to_hash }.include?("duration")
-      insist { subject["tags"] }.nil?
+      insist { subject.get("tags") }.nil?
     end
 
   end
@@ -806,13 +806,13 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "test 28.4ms" do
-      insist { subject["duration"] } == "28.4"
-      insist { subject["tags"] }.nil?
+      insist { subject.get("duration") } == "28.4"
+      insist { subject.get("tags") }.nil?
     end
 
     sample "test N/A" do
-      insist { subject["duration"] }.nil?
-      insist { subject["tags"] }.nil?
+      insist { subject.get("duration") }.nil?
+      insist { subject.get("tags") }.nil?
     end
   end
 

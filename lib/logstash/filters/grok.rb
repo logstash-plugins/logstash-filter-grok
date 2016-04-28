@@ -247,7 +247,7 @@
       # will let folks redefine built-in patterns at runtime.
       @patternfiles += patterns_files_from_paths(@@patterns_path.to_a, "*")
       @patternfiles += patterns_files_from_paths(@patterns_dir, @patterns_files_glob)
-  
+
       @patterns = Hash.new { |h,k| h[k] = [] }
 
       @logger.info? and @logger.info("Match data", :match => @match)
@@ -269,8 +269,6 @@
 
     public
     def filter(event)
-
-
       matched = false
       done = false
 
@@ -294,7 +292,7 @@
 
     private
     def match(groks, field, event)
-      input = event[field]
+      input = event.get(field)
       if input.is_a?(Array)
         success = false
         input.each do |input|
@@ -327,21 +325,21 @@
       return if (value.nil? || (value.is_a?(String) && value.empty?)) unless @keep_empty_captures
 
       if @overwrite.include?(field)
-        event[field] = value
+        event.set(field, value)
       else
-        v = event[field]
+        v = event.get(field)
         if v.nil?
-          event[field] = value
+          event.set(field, value)
         elsif v.is_a?(Array)
           # do not replace the code below with:
           #   event[field] << value
           # this assumes implementation specific feature of returning a mutable object
           # from a field ref which should not be assumed and will change in the future.
           v << value
-          event[field] = v
+          event.set(field, v)
         elsif v.is_a?(String)
           # Promote to array since we aren't overwriting.
-          event[field] = [v, value]
+          event.set(field, [v, value])
         end
       end
     end
