@@ -29,7 +29,6 @@ describe LogStash::Filters::Grok do
       filter {
         grok {
           match => { "message" => "%{SYSLOGLINE}" }
-          singles => true
           overwrite => [ "message" ]
         }
       }
@@ -52,7 +51,6 @@ describe LogStash::Filters::Grok do
       filter {
         grok {
           match => { "message" => "%{SYSLOG5424LINE}" }
-          singles => true
         }
       }
     CONFIG
@@ -195,7 +193,6 @@ describe LogStash::Filters::Grok do
       filter {
         grok {
           match => { "message" => "%{NUMBER:foo:int} %{NUMBER:bar:float}" }
-          singles => true
         }
       }
     CONFIG
@@ -214,7 +211,6 @@ describe LogStash::Filters::Grok do
         grok {
           match => { "message" => "%{FIZZLE=\\d+}" }
           named_captures_only => false
-          singles => true
         }
       }
     CONFIG
@@ -231,7 +227,6 @@ describe LogStash::Filters::Grok do
           match => { "message" => "%{WORD:word}" }
           match => { "examplefield" => "%{NUMBER:num}" }
           break_on_match => false
-          singles => true
         }
       }
     CONFIG
@@ -247,7 +242,6 @@ describe LogStash::Filters::Grok do
       filter {
         grok {
           match => { "message" => "matchme %{NUMBER:fancy}" }
-          singles => true
           add_field => [ "new_field", "%{fancy}" ]
         }
       }
@@ -310,7 +304,6 @@ describe LogStash::Filters::Grok do
         grok {
           match => { "message" => "Hello %{WORD}. %{WORD:foo}" }
           named_captures_only => false
-          singles => true
         }
       }
     CONFIG
@@ -328,7 +321,6 @@ describe LogStash::Filters::Grok do
       config <<-'CONFIG'
         filter {
           grok {
-            singles => true
             match => { "message" => "(?<foo>\w+)" }
           }
         }
@@ -343,7 +335,6 @@ describe LogStash::Filters::Grok do
       config <<-'CONFIG'
         filter {
           grok {
-            singles => true
             match => { "message" => "(?<timestamp>%{DATE_EU} %{TIME})" }
           }
         }
@@ -392,7 +383,7 @@ describe LogStash::Filters::Grok do
     config <<-'CONFIG'
       filter {
         grok {
-          pattern => "%{LOGLEVEL:level}: error!"
+          match => { "message" => "%{LOGLEVEL:level}: error!" }
         }
       }
     CONFIG
@@ -440,7 +431,6 @@ describe LogStash::Filters::Grok do
       filter {
         grok {
           match => { "message" => "%{DATE_EU:stimestamp}" }
-          singles => true
         }
       }
     CONFIG
@@ -455,7 +445,6 @@ describe LogStash::Filters::Grok do
       filter {
         grok {
           match => { "message" => "%{WORD:foo-bar}" }
-          singles => true
         }
       }
     CONFIG
@@ -481,7 +470,6 @@ describe LogStash::Filters::Grok do
       filter {
         grok {
           match => { "message" => "%{SYSLOGLINE}" }
-          singles => true
           overwrite => [ "message" ]
         }
       }
@@ -498,12 +486,11 @@ describe LogStash::Filters::Grok do
     end
   end
 
-  describe "singles with duplicate-named fields" do
+  describe "single value match with duplicate-named fields in pattern" do
     config <<-CONFIG
       filter {
         grok {
           match => { "message" => "%{INT:foo}|%{WORD:foo}" }
-          singles => true
         }
       }
     CONFIG
@@ -649,8 +636,8 @@ describe LogStash::Filters::Grok do
     config <<-CONFIG
       filter {
         grok {
-          #pattern => "<%{POSINT:syslog_pri}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{PROG:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}"
-          pattern => "<%{POSINT:syslog_pri}>%{SPACE}%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{PROG:syslog_program}(:?)(?:\\[%{GREEDYDATA:syslog_pid}\\])?(:?) %{GREEDYDATA:syslog_message}"
+          #match => { "message" => "<%{POSINT:syslog_pri}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{PROG:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
+          match => { "message" => "<%{POSINT:syslog_pri}>%{SPACE}%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{PROG:syslog_program}(:?)(?:\\[%{GREEDYDATA:syslog_pid}\\])?(:?) %{GREEDYDATA:syslog_message}" }
         }
       }
     CONFIG
@@ -677,7 +664,7 @@ describe LogStash::Filters::Grok do
     end
 
     let(:config) do
-      'filter { grok { pattern => "%{WORD:word}" } }'
+      'filter { grok { match => { "message" => "%{WORD:word}" } } }'
     end
 
     sample("message" => 'hello') do
@@ -709,7 +696,7 @@ describe LogStash::Filters::Grok do
     end
 
     let(:config) do
-      "filter { grok { patterns_dir => \"#{tmpdir}\" pattern => \"%{WORD:word}\" } }"
+      "filter { grok { patterns_dir => \"#{tmpdir}\" match => { \"message\" => \"%{WORD:word}\" } } }"
     end
 
     sample("message" => '0') do
@@ -740,7 +727,7 @@ describe LogStash::Filters::Grok do
     end
 
     let(:config) do
-      "filter { grok { patterns_dir => \"#{tmpdir}\" patterns_files_glob => \"*.pattern\" pattern => \"%{WORD:word}\" } }"
+      "filter { grok { patterns_dir => \"#{tmpdir}\" patterns_files_glob => \"*.pattern\" match => { \"message\" => \"%{WORD:word}\" } } }"
     end
 
     sample("message" => '0') do

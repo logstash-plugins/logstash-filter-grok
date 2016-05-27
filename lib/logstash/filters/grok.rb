@@ -139,12 +139,6 @@
   class LogStash::Filters::Grok < LogStash::Filters::Base
     config_name "grok"
 
-    # Specify a pattern to parse with. This will match the `message` field.
-    #
-    # If you want to match other fields than message, use the `match` setting.
-    # Multiple patterns is fine.
-    config :pattern, :validate => :array, :deprecated => "You should use this instead: match => { \"message\" => \"your pattern here\" }"
-
     # A hash of matches of field => value
     #
     # For example:
@@ -195,10 +189,6 @@
     # If `true`, keep empty captures as event fields.
     config :keep_empty_captures, :validate => :boolean, :default => false
 
-    # If `true`, make single-value fields simply that value, not an array
-    # containing that one value.
-    config :singles, :validate => :boolean, :default => true, :deprecated => "This behavior is the default now, you don't need to set it."
-
     # Append values to the `tags` field when there has been no
     # successful match
     config :tag_on_failure, :validate => :array, :default => ["_grokparsefailure"]
@@ -231,8 +221,6 @@
     public
     def initialize(params)
       super(params)
-      @match["message"] ||= []
-      @match["message"] += @pattern if @pattern # the config 'pattern' value (array)
       # a cache of capture name handler methods.
       @handlers = {}
     end
