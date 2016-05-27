@@ -1,3 +1,7 @@
+## 3.1.0
+ - breaking,config: Remove deprecated config `singles`.
+ - breaking,config: Remove deprecated config `pattern`. Please use `match => { "message" => ""}` syntax.
+
 ## 3.0.1
  - internal: Republish all the gems under jruby.
 
