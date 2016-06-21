@@ -240,8 +240,11 @@
 
       @logger.info? and @logger.info("Match data", :match => @match)
 
+      @metric_match_fields = metric.namespace(:patterns_per_field)
+
       @match.each do |field, patterns|
         patterns = [patterns] if patterns.is_a?(String)
+        @metric_match_fields.gauge(field, patterns.length)
 
         @logger.info? and @logger.info("Grok compile", :field => field, :patterns => patterns)
         patterns.each do |pattern|
@@ -270,8 +273,10 @@
       end # @patterns.each
 
       if matched
+        metric.increment(:matches)
         filter_matched(event)
       else
+        metric.increment(:failures)
         @tag_on_failure.each{|tag| event.tag(tag)}
       end
 

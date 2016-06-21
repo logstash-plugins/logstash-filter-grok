@@ -1,3 +1,6 @@
+## 3.1.1
+ - Added metrics for failed, matched and number of patters per field.
+
 ## 3.1.0
  - breaking,config: Remove deprecated config `singles`.
  - breaking,config: Remove deprecated config `pattern`. Please use `match => { "message" => ""}` syntax.
