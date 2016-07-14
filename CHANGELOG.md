@@ -1,3 +1,6 @@
+## 3.1.2
+  - Relax constraint on logstash-core-plugin-api to >= 1.60 <= 2.99
+
 ## 3.1.1
  - Added metrics for failed, matched and number of patters per field.
 
