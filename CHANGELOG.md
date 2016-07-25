@@ -1,3 +1,6 @@
+## 3.2.0
+  - Add new timeout options to cancel grok execution if a threshold time is exceeded
+
 ## 3.1.2
   - Relax constraint on logstash-core-plugin-api to >= 1.60 <= 2.99
 

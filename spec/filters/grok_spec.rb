@@ -407,12 +407,30 @@ describe LogStash::Filters::Grok do
     end
   end
 
+  describe "timeout on failure" do
+    config <<-CONFIG
+      filter { 
+        grok {
+          match => { 
+            message => "(.*a){30}"
+          }
+          timeout_millis => 100
+        }
+      }
+    CONFIG
+
+    sample "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" do
+      expect(subject.get("tags")).to include("_groktimeout")
+      expect(subject.get("tags")).not_to include("_grokparsefailure")
+    end
+  end
+
   describe "tagging on failure" do
     config <<-CONFIG
       filter {
         grok {
           match => { "message" => "matchme %{NUMBER:fancy}" }
-          tag_on_failure => false
+          tag_on_failure => not_a_match
         }
       }
     CONFIG
@@ -422,7 +440,7 @@ describe LogStash::Filters::Grok do
     end
 
     sample "this will not be matched" do
-      insist { subject.get("tags") }.include?("false")
+      insist { subject.get("tags") }.include?("not_a_match")
     end
   end
 

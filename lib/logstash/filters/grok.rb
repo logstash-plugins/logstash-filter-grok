@@ -138,6 +138,8 @@
   # `SYSLOGBASE` pattern which itself is defined by other patterns.
   class LogStash::Filters::Grok < LogStash::Filters::Base
     config_name "grok"
+    require "logstash/filters/grok/timeout_enforcer"
+    require "logstash/filters/grok/timeout_exception"
 
     # A hash of matches of field => value
     #
@@ -193,6 +195,15 @@
     # successful match
     config :tag_on_failure, :validate => :array, :default => ["_grokparsefailure"]
 
+    # Attempt to terminate regexps after this amount of time.
+    # This applies per pattern if multiple patterns are applied
+    # This will never timeout early, but may take a little longer to timeout.
+    # Actual timeout is approximate based on a 250ms quantization.
+    config :timeout_millis, :validate => :number, :default => 2000
+
+    # Tag to apply if a grok regexp times out.
+    config :tag_on_timeout, :validate => :string, :default => '_groktimeout'
+
     # The fields to overwrite.
     #
     # This allows you to overwrite a value in a field that already exists.
@@ -223,6 +234,9 @@
       super(params)
       # a cache of capture name handler methods.
       @handlers = {}
+
+      @timeout_enforcer = TimeoutEnforcer.new(@logger, @timeout_millis * 1000000)
+      @timeout_enforcer.start!
     end
 
     public
@@ -264,8 +278,11 @@
       done = false
 
       @logger.debug? and @logger.debug("Running grok filter", :event => event);
+
       @patterns.each do |field, groks|
-        if match(groks, field, event)
+        success = match(groks, field, event)
+        
+        if success
           matched = true
           break if @break_on_match
         end
@@ -277,10 +294,14 @@
         filter_matched(event)
       else
         metric.increment(:failures)
-        @tag_on_failure.each{|tag| event.tag(tag)}
+        @tag_on_failure.each {|tag| event.tag(tag)}
       end
 
       @logger.debug? and @logger.debug("Event now: ", :event => event)
+    rescue ::LogStash::Filters::Grok::TimeoutException => e      
+      @logger.warn(e.message)
+      metric.increment(:timeouts)
+      event.tag(@tag_on_timeout)
     end # def filter
 
     private
@@ -289,28 +310,32 @@
       if input.is_a?(Array)
         success = false
         input.each do |input|
-          success |= match_against_groks(groks, input, event)
+          success |= match_against_groks(groks, field, input, event)
         end
         return success
       else
-        return match_against_groks(groks, input, event)
+        match_against_groks(groks, field, input, event)
       end
     rescue StandardError => e
-      @logger.warn("Grok regexp threw exception", :exception => e.message)
+      @logger.warn("Grok regexp threw exception", :exception => e.message, :backtrace => e.backtrace, :class => e.class.name)
+      return false
     end
-
+    
     private
-    def match_against_groks(groks, input, event)
+    def match_against_groks(groks, field, input, event)
+      input = input.to_s
       matched = false
       groks.each do |grok|
         # Convert anything else to string (number, hash, etc)
-        matched = grok.match_and_capture(input.to_s) do |field, value|
-          matched = true
-          handle(field, value, event)
+
+        matched = @timeout_enforcer.grok_till_timeout(event, grok, field, input) { grok.execute(input) }
+        if matched
+          grok.capture(matched) {|field, value| handle(field, value, event)}
+          break if @break_on_match
         end
-        break if matched and @break_on_match
       end
-      return matched
+      
+      matched
     end
 
     private
@@ -363,5 +388,9 @@
         grok.add_patterns_from_file(path)
       end
     end # def add_patterns_from_files
+
+    def close
+      @timeout_handler.stop!
+    end
 
   end # class LogStash::Filters::Grok
