@@ -159,9 +159,9 @@
     #
     # Logstash ships by default with a bunch of patterns, so you don't
     # necessarily need to define this yourself unless you are adding additional
-    # patterns. You can point to multiple pattern directories using this setting
+    # patterns. You can point to multiple pattern directories using this setting.
     # Note that Grok will read all files in the directory matching the patterns_files_glob
-    # and assume its a pattern file (including any tilde backup files)
+    # and assume it's a pattern file (including any tilde backup files)
     # [source,ruby]
     #     patterns_dir => ["/opt/logstash/patterns", "/opt/logstash/extra_patterns"]
     #
