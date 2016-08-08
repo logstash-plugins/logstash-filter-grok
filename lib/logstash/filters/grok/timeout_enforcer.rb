@@ -1,4 +1,6 @@
 class LogStash::Filters::Grok::TimeoutEnforcer
+  attr_reader :running
+  
   def initialize(logger, timeout_nanos)
     @logger = logger
     @running = true

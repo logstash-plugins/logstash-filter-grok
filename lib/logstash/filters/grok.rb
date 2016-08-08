@@ -222,6 +222,8 @@
     # will be parsed and `hello world` will overwrite the original message.
     config :overwrite, :validate => :array, :default => []
 
+    attr_reader :timeout_enforcer
+    
     # Register default pattern paths
     @@patterns_path ||= Set.new
     @@patterns_path += [
@@ -390,7 +392,7 @@
     end # def add_patterns_from_files
 
     def close
-      @timeout_handler.stop!
+      @timeout_enforcer.stop!
     end
 
   end # class LogStash::Filters::Grok
