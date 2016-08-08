@@ -1,3 +1,7 @@
+## 3.2.1
+  - Fix race condition in TimeoutEnforcer that could cause crashes
+  - Fix shutdown code to close cleanly and properly close the enforcer
+
 ## 3.2.0
   - Add new timeout options to cancel grok execution if a threshold time is exceeded
 
