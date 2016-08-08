@@ -821,4 +821,23 @@ describe LogStash::Filters::Grok do
     end
   end
 
+  describe "closing" do    
+    subject(:plugin) do
+      ::LogStash::Filters::Grok.new("match" => {"message" => "A"})
+    end
+
+    before do
+      plugin.register
+    end
+
+    it "should close cleanly" do
+      expect { plugin.do_close }.not_to raise_error
+    end
+
+    it "should stop the timeout enforcer" do
+      plugin.do_close
+      expect(plugin.timeout_enforcer.running).to be false
+    end
+  end
+
 end
