@@ -42,12 +42,14 @@ class LogStash::Filters::Grok::TimeoutEnforcer
   end
 
   def cancel_timed_out!
-    @threads_to_start_time.each do |thread,start_time|
-      now = java.lang.System.nanoTime # save ourselves some nanotime calls
-      elapsed = java.lang.System.nanoTime - start_time
-      if elapsed > @timeout_nanos
-        elapsed_millis = elapsed / 1000
-        thread.raise(::LogStash::Filters::Grok::TimeoutException.new(elapsed_millis))
+    @timer_mutex.synchronize do
+      @threads_to_start_time.each do |thread,start_time|
+        now = java.lang.System.nanoTime # save ourselves some nanotime calls
+        elapsed = java.lang.System.nanoTime - start_time
+        if elapsed > @timeout_nanos
+          elapsed_millis = elapsed / 1000
+          thread.raise(::LogStash::Filters::Grok::TimeoutException.new(elapsed_millis))
+        end
       end
     end
   end
