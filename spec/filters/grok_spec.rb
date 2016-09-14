@@ -846,12 +846,12 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample('{"facility":"auth","message":"Failed password for testuser from 1.1.1.1 port 22"}') do
-      insist { subject["username"] } == "testuser"
-      insist { subject["port"] } == "22"
-      insist { subject["src_ip"] } == "1.1.1.1"
-      insist { LogStash::Json.dump(subject['username']) } == "\"testuser\""
+      insist { subject.get("username") } == "testuser"
+      insist { subject.get("port") } == "22"
+      insist { subject.get("src_ip") } == "1.1.1.1"
+      insist { LogStash::Json.dump(subject.get('username')) } == "\"testuser\""
 
-      insist { subject.to_json } =~ %r|{"@version":"1","@timestamp":"20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ","username":"testuser","src_ip":"1.1.1.1","port":"22","tags":\["ssh_failure"\]}|
+      insist { subject.to_json } =~ %r|{"src_ip":"1.1.1.1","@timestamp":"20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ","port":"22","@version":"1","username":"testuser","tags":\["ssh_failure"\]}|
     end
   end
 
