@@ -254,7 +254,7 @@
 
       @patterns = Hash.new { |h,k| h[k] = [] }
 
-      @logger.info? and @logger.info("Match data", :match => @match)
+      @logger.debug("Match data", :match => @match)
 
       @metric_match_fields = metric.namespace(:patterns_per_field)
 
@@ -262,7 +262,7 @@
         patterns = [patterns] if patterns.is_a?(String)
         @metric_match_fields.gauge(field, patterns.length)
 
-        @logger.info? and @logger.info("Grok compile", :field => field, :patterns => patterns)
+        @logger.trace("Grok compile", :field => field, :patterns => patterns)
         patterns.each do |pattern|
           @logger.debug? and @logger.debug("regexp: #{@type}/#{field}", :pattern => pattern)
           grok = Grok.new
@@ -367,14 +367,14 @@
     private
     def patterns_files_from_paths(paths, glob)
       patternfiles = []
-      @logger.info? and @logger.info("Grok patterns path", :paths => paths)
+      @logger.debug("Grok patterns path", :paths => paths)
       paths.each do |path|
         if File.directory?(path)
           path = File.join(path, glob)
         end
 
         Dir.glob(path).each do |file|
-          @logger.info? and @logger.info("Grok loading patterns from file", :path => file)
+          @logger.trace("Grok loading patterns from file", :path => file)
           patternfiles << file
         end
       end

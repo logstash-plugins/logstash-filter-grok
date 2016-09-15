@@ -1,3 +1,6 @@
+## 3.2.2
+  - Move one log message from info to debug to avoid noise
+
 ## 3.2.1
   - Fix race condition in TimeoutEnforcer that could cause crashes
   - Fix shutdown code to close cleanly and properly close the enforcer
