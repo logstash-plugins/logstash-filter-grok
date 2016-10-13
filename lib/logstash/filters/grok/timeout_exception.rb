@@ -1,8 +1,7 @@
 class LogStash::Filters::Grok::TimeoutException < Exception
-  attr_accessor :elapsed_millis, :grok, :field, :value
+  attr_reader :grok, :field, :value
   
-  def initialize(elapsed_millis, grok=nil, field=nil, value=nil)
-    @elapsed_millis = elapsed_millis
+  def initialize(grok=nil, field=nil, value=nil)
     @field = field
     @value = value
     @grok = grok
@@ -20,4 +19,3 @@ class LogStash::Filters::Grok::TimeoutException < Exception
     end
   end
 end
-

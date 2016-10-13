@@ -14,24 +14,21 @@ class LogStash::Filters::Grok::TimeoutEnforcer
 
   def grok_till_timeout(event, grok, field, value)
     begin
-      thread = Thread.current
+      thread = java.lang.Thread.currentThread()
       start_thread_groking(thread)
       yield
-    rescue ::LogStash::Filters::Grok::TimeoutException => e
-      # These fields aren't present at the time the exception was raised
-      # so we add them here.
-      # We could store this metadata in the @threads_to_start_time hash
-      # but that'd come at a perf cost and this works just as well.
-      e.grok = grok
-      e.field = field
-      e.value = value
-      raise e
+    rescue InterruptedRegexpError => e
+      raise ::LogStash::Filters::Grok::TimeoutException.new(grok, field, value)
     ensure
       stop_thread_groking(thread)
+      # Clear any interrupts from any previous invocations that were not caught by Joni
+      thread.interrupted
     end
   end
 
   def start_thread_groking(thread)
+    # Clear any interrupts from any previous invocations that were not caught by Joni
+    thread.interrupted
     @timer_mutex.synchronize do
       @threads_to_start_time[thread] = java.lang.System.nanoTime()
     end
@@ -50,7 +47,10 @@ class LogStash::Filters::Grok::TimeoutEnforcer
         elapsed = java.lang.System.nanoTime - start_time
         if elapsed > @timeout_nanos
           elapsed_millis = elapsed / 1000
-          thread.raise(::LogStash::Filters::Grok::TimeoutException.new(elapsed_millis))
+          thread.interrupt()
+          # Ensure that we never attempt to cancel this thread twice in the event
+          # of weird races
+          stop_thread_groking(thread)
         end
       end
     end

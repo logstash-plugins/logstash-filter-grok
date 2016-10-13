@@ -1,4 +1,8 @@
-## 3.2.2
+## 3.2.3
+  - No longer use 'trace' log level as it breaks rspec
+  - Fix race conditions in timeout enforcer
+
+## 3.2.3
   - Move one log message from info to debug to avoid noise
 
 ## 3.2.1
