@@ -31,6 +31,36 @@ class LogStash::Filters::Grok::TimeoutEnforcer
     end
   end
 
+  def start!
+    @timer_thread = Thread.new do
+      while @running
+        begin
+          cancel_timed_out!
+        rescue Exception => e
+          @logger.error("Error while attempting to check/cancel excessively long grok patterns",
+                        :message => e.message,
+                        :class => e.class.name,
+                        :backtrace => e.backtrace
+                       )
+        end
+        sleep 0.25
+      end
+    end
+  end
+
+  def stop!
+    @running = false
+    # Check for the thread mostly for a fast start/shutdown scenario
+    @timer_thread.join if @timer_thread
+  end
+
+  private
+
+  # These methods are private in large part because if they aren't called
+  # in specific sequence and used together in specific ways the interrupt
+  # behavior will be incorrect. Do NOT use or modify these methods unless
+  # you know what you are doing!
+
   def start_thread_groking(thread)
     # Clear any interrupts from any previous invocations that were not caught by Joni
     thread.interrupted
@@ -72,26 +102,5 @@ class LogStash::Filters::Grok::TimeoutEnforcer
     @state_lock.unlock()
   end
 
-  def start!
-    @timer_thread = Thread.new do
-      while @running
-        begin
-          cancel_timed_out!
-        rescue Exception => e
-          @logger.error("Error while attempting to check/cancel excessively long grok patterns",
-                        :message => e.message,
-                        :class => e.class.name,
-                        :backtrace => e.backtrace
-                       )
-        end
-        sleep 0.25
-      end
-    end
-  end
 
-  def stop!
-    @running = false
-    # Check for the thread mostly for a fast start/shutdown scenario
-    @timer_thread.join if @timer_thread
-  end
 end
