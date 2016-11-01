@@ -1,3 +1,6 @@
+## 3.2.4
+  - Fix mutex interruption bug that could crash logstash. See: https://github.com/logstash-plugins/logstash-filter-grok/issues/97
+
 ## 3.2.3
   - No longer use 'trace' log level as it breaks rspec
   - Fix race conditions in timeout enforcer
