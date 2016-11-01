@@ -1,6 +1,8 @@
+java_import java.util.concurrent.locks.ReentrantLock
+
 class LogStash::Filters::Grok::TimeoutEnforcer
   attr_reader :running
-  
+
   def initialize(logger, timeout_nanos)
     @logger = logger
     @running = true
@@ -8,8 +10,8 @@ class LogStash::Filters::Grok::TimeoutEnforcer
 
     # Stores running matches with their start time, this is used to cancel long running matches
     # Is a map of Thread => start_time
-    @timer_mutex = Mutex.new
-    @threads_to_start_time = {}        
+    @threads_to_start_time = {}
+    @state_lock = java.util.concurrent.locks.ReentrantLock.new
   end
 
   def grok_till_timeout(event, grok, field, value)
@@ -22,6 +24,9 @@ class LogStash::Filters::Grok::TimeoutEnforcer
     ensure
       stop_thread_groking(thread)
       # Clear any interrupts from any previous invocations that were not caught by Joni
+      # It may appear that this should go in #stop_thread_groking but that would actually
+      # break functionality! If this were moved there we would clear the interrupt
+      # immediately after setting it in #cancel_timed_out, hence this MUST be here
       thread.interrupted
     end
   end
@@ -29,19 +34,19 @@ class LogStash::Filters::Grok::TimeoutEnforcer
   def start_thread_groking(thread)
     # Clear any interrupts from any previous invocations that were not caught by Joni
     thread.interrupted
-    @timer_mutex.synchronize do
+    synchronize do
       @threads_to_start_time[thread] = java.lang.System.nanoTime()
     end
   end
 
   def stop_thread_groking(thread)
-    @timer_mutex.synchronize do
+    synchronize do
       @threads_to_start_time.delete(thread)
     end
   end
 
   def cancel_timed_out!
-    @timer_mutex.synchronize do
+    synchronize do
       @threads_to_start_time.each do |thread,start_time|
         now = java.lang.System.nanoTime # save ourselves some nanotime calls
         elapsed = java.lang.System.nanoTime - start_time
@@ -56,6 +61,17 @@ class LogStash::Filters::Grok::TimeoutEnforcer
     end
   end
 
+  # We use this instead of a Mutex because JRuby mutexes are interruptible
+  # We actually don't want that behavior since we always clear the interrupt in
+  # grok_till_timeout
+  def synchronize
+    # The JRuby Mutex uses lockInterruptibly which is what we DO NOT want
+    @state_lock.lock()
+    yield
+  ensure
+    @state_lock.unlock()
+  end
+
   def start!
     @timer_thread = Thread.new do
       while @running
@@ -67,7 +83,7 @@ class LogStash::Filters::Grok::TimeoutEnforcer
                         :class => e.class.name,
                         :backtrace => e.backtrace
                        )
-        end                   
+        end
         sleep 0.25
       end
     end
