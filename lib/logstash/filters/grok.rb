@@ -199,7 +199,7 @@
     # This applies per pattern if multiple patterns are applied
     # This will never timeout early, but may take a little longer to timeout.
     # Actual timeout is approximate based on a 250ms quantization.
-    config :timeout_millis, :validate => :number, :default => 2000
+    config :timeout_millis, :validate => :number, :default => 30000
 
     # Tag to apply if a grok regexp times out.
     config :tag_on_timeout, :validate => :string, :default => '_groktimeout'
@@ -300,7 +300,7 @@
       end
 
       @logger.debug? and @logger.debug("Event now: ", :event => event)
-    rescue ::LogStash::Filters::Grok::TimeoutException => e      
+    rescue ::LogStash::Filters::Grok::TimeoutException => e
       @logger.warn(e.message)
       metric.increment(:timeouts)
       event.tag(@tag_on_timeout)
