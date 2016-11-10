@@ -409,9 +409,9 @@ describe LogStash::Filters::Grok do
 
   describe "timeout on failure" do
     config <<-CONFIG
-      filter { 
+      filter {
         grok {
-          match => { 
+          match => {
             message => "(.*a){30}"
           }
           timeout_millis => 100
@@ -821,13 +821,26 @@ describe LogStash::Filters::Grok do
     end
   end
 
-  describe "closing" do    
+  describe "opening/closing" do
+    let(:config) { {"match" => {"message" => "A"}} }
     subject(:plugin) do
-      ::LogStash::Filters::Grok.new("match" => {"message" => "A"})
+      ::LogStash::Filters::Grok.new(config)
     end
 
     before do
       plugin.register
+    end
+
+    it "should start the timeout enforcer" do
+      expect(plugin.timeout_enforcer.running).to be true
+    end
+
+    context "with the timeout enforcer disabled" do
+      let(:config) { super.merge("timeout_millis" => 0) }
+
+      it "should not start the timeout enforcer" do
+        expect(plugin.timeout_enforcer.running).to be false
+      end
     end
 
     it "should close cleanly" do
