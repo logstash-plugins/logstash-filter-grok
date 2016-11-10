@@ -5,7 +5,7 @@ class LogStash::Filters::Grok::TimeoutEnforcer
 
   def initialize(logger, timeout_nanos)
     @logger = logger
-    @running = true
+    @running = false
     @timeout_nanos = timeout_nanos
 
     # Stores running matches with their start time, this is used to cancel long running matches
@@ -32,6 +32,7 @@ class LogStash::Filters::Grok::TimeoutEnforcer
   end
 
   def start!
+    @running = true
     @timer_thread = Thread.new do
       while @running
         begin

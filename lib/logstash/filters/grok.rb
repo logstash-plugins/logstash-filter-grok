@@ -199,6 +199,7 @@
     # This applies per pattern if multiple patterns are applied
     # This will never timeout early, but may take a little longer to timeout.
     # Actual timeout is approximate based on a 250ms quantization.
+    # Set to 0 to disable timeouts
     config :timeout_millis, :validate => :number, :default => 30000
 
     # Tag to apply if a grok regexp times out.
@@ -238,7 +239,7 @@
       @handlers = {}
 
       @timeout_enforcer = TimeoutEnforcer.new(@logger, @timeout_millis * 1000000)
-      @timeout_enforcer.start!
+      @timeout_enforcer.start! unless @timeout_millis == 0
     end
 
     public
