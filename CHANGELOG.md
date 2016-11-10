@@ -1,3 +1,7 @@
+## 3.3.0
+  - Allow timeout enforcer to be disabled by setting timeout_millis to nil
+  - Change default timeout_millis to 30s
+
 ## 3.2.4
   - Fix mutex interruption bug that could crash logstash. See: https://github.com/logstash-plugins/logstash-filter-grok/issues/97
 
