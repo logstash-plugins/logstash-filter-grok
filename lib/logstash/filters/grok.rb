@@ -163,7 +163,7 @@
     # necessarily need to define this yourself unless you are adding additional
     # patterns. You can point to multiple pattern directories using this setting.
     # Note that Grok will read all files in the directory matching the patterns_files_glob
-    # and assume it's a pattern file (including any tilde backup files)
+    # and assume it's a pattern file (including any tilde backup files). 
     # [source,ruby]
     #     patterns_dir => ["/opt/logstash/patterns", "/opt/logstash/extra_patterns"]
     #
@@ -174,6 +174,8 @@
     # For example:
     # [source,ruby]
     #     NUMBER \d+
+    #
+    # The patterns are loaded when the pipeline is created.
     config :patterns_dir, :validate => :array, :default => []
 
     # Glob pattern, used to select the pattern files in the directories

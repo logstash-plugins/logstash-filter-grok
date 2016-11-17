@@ -1,3 +1,6 @@
+## 3.3.1
+  - Docs: indicate that grok patterns are loaded when the pipeline is created
+
 ## 3.3.0
   - Allow timeout enforcer to be disabled by setting timeout_millis to nil
   - Change default timeout_millis to 30s
