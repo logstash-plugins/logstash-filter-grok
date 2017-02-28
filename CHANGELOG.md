@@ -1,3 +1,6 @@
+## 3.4.0
+  - Add option to define patterns inline in the filter using `pattern_definitions` configuration.
+
 ## 3.3.1
   - Docs: indicate that grok patterns are loaded when the pipeline is created
 

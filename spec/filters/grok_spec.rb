@@ -868,4 +868,40 @@ describe LogStash::Filters::Grok do
     end
   end
 
+  describe  "grok with inline pattern definition successfully extracts fields" do
+    config <<-CONFIG
+      filter {
+        grok {
+          match => { "message" => "%{APACHE_TIME:timestamp} %{LOGLEVEL:level} %{MY_PATTERN:hindsight}" }
+          pattern_definitions => { "APACHE_TIME" => "%{DAY} %{MONTH} %{MONTHDAY} %{TIME} %{YEAR}"
+           "MY_PATTERN" => "%{YEAR}"}
+        }
+      }
+    CONFIG
+
+    sample "Mon Dec 26 16:22:08 2016 error 2020" do
+      insist { subject.get("timestamp") } == "Mon Dec 26 16:22:08 2016"
+      insist { subject.get("level") } == "error"
+      insist { subject.get("hindsight") } == "2020"
+    end
+  end
+
+  describe  "grok with inline pattern definition overwrites existing pattern definition" do
+    config <<-CONFIG
+      filter {
+        grok {
+          match => { "message" => "%{APACHE_TIME:timestamp} %{LOGLEVEL:level}" }
+          # loglevel was previously ([Aa]lert|ALERT|[Tt]...
+          pattern_definitions => { "APACHE_TIME" => "%{DAY} %{MONTH} %{MONTHDAY} %{TIME} %{YEAR}"
+           "LOGLEVEL" => "%{NUMBER}"}
+        }
+      }
+    CONFIG
+
+    sample "Mon Dec 26 16:22:08 2016 9999" do
+      insist { subject.get("timestamp") } == "Mon Dec 26 16:22:08 2016"
+      insist { subject.get("level") } == "9999"
+    end
+  end
+
 end
