@@ -136,6 +136,11 @@
   #
   # The `timestamp`, `logsource`, `program`, and `pid` fields come from the
   # `SYSLOGBASE` pattern which itself is defined by other patterns.
+  #
+  # Another option is to define patterns _inline_ in the filter using `pattern_definitions`.
+  # This is mostly for convenience and allows user to define a pattern which can be used just in that 
+  # filter. This newly defined patterns in `pattern_definitions` will not be available outside of that particular `grok` filter.
+  #
   class LogStash::Filters::Grok < LogStash::Filters::Base
     config_name "grok"
     require "logstash/filters/grok/timeout_enforcer"
@@ -177,6 +182,12 @@
     #
     # The patterns are loaded when the pipeline is created.
     config :patterns_dir, :validate => :array, :default => []
+
+    # A hash of pattern-name and pattern tuples defining custom patterns to be used by 
+    # the current filter. Patterns matching existing names will override the pre-existing 
+    # definition. Think of this as inline patterns available just for this definition of 
+    # grok
+    config :pattern_definitions, :validate => :hash, :default => {}
 
     # Glob pattern, used to select the pattern files in the directories
     # specified by patterns_dir
@@ -271,6 +282,7 @@
           grok = Grok.new
           grok.logger = @logger unless @logger.nil?
           add_patterns_from_files(@patternfiles, grok)
+          add_patterns_from_inline_definition(@pattern_definitions, grok)
           grok.compile(pattern, @named_captures_only)
           @patterns[field] << grok
         end
@@ -393,6 +405,14 @@
         grok.add_patterns_from_file(path)
       end
     end # def add_patterns_from_files
+
+    private
+    def add_patterns_from_inline_definition(pattern_definitions, grok)
+      pattern_definitions.each do |name, pattern|
+        next if pattern.nil?
+        grok.add_pattern(name, pattern.chomp)
+      end
+    end
 
     def close
       @timeout_enforcer.stop!
