@@ -161,6 +161,13 @@
     #     }
 
     #
+    # If you need to match multiple patterns against a single field, the value can be an array of patterns
+    # [source,ruby]
+    #     filter {
+    #       grok { match => { "message" => [ "Duration: %{NUMBER:duration}", "Speed: %{NUMBER:speed}" ] } }
+    #     }
+
+    #  
     config :match, :validate => :hash, :default => {}
 
     #
