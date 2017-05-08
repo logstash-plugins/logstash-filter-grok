@@ -11,7 +11,7 @@ class LogStash::Filters::Grok::TimeoutEnforcer
     # Stores running matches with their start time, this is used to cancel long running matches
     # Is a map of Thread => start_time
     @threads_to_start_time = {}
-    @state_lock = java.util.concurrent.locks.ReentrantLock.new
+    @state_lock = ReentrantLock.new
   end
 
   def grok_till_timeout(event, grok, field, value)
