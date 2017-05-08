@@ -1,6 +1,6 @@
 # encoding: utf-8
 require "logstash/devutils/rspec/spec_helper"
-
+require "stud/temporary"
 
 module LogStash::Environment
   # running the grok code outside a logstash package means
@@ -668,15 +668,13 @@ describe LogStash::Filters::Grok do
   end
 
   describe "patterns in the 'patterns/' dir override core patterns" do
-    require 'tmpdir'
-    require 'tempfile'
 
     let(:pattern_dir) { File.join(LogStash::Environment::LOGSTASH_HOME, "patterns") }
     let(:has_pattern_dir?) { Dir.exist?(pattern_dir) }
 
     before do
       FileUtils.mkdir(pattern_dir) unless has_pattern_dir?
-      @file = Tempfile.new('grok', pattern_dir)
+      @file = File.new(File.join(pattern_dir, 'grok.pattern'), 'w+')
       @file.write('WORD \b[2-5]\b')
       @file.close
     end
@@ -690,25 +688,23 @@ describe LogStash::Filters::Grok do
     end
 
     after do
-      @file.unlink
+      File.unlink @file
       FileUtils.rm_rf(pattern_dir) if has_pattern_dir?
     end
   end
 
   describe "patterns in custom dir override those in 'patterns/' dir" do
-    require 'tmpdir'
-    require 'tempfile'
 
-    let(:tmpdir) { Dir.mktmpdir }
+    let(:tmpdir) { Stud::Temporary.directory }
     let(:pattern_dir) { File.join(LogStash::Environment::LOGSTASH_HOME, "patterns") }
     let(:has_pattern_dir?) { Dir.exist?(pattern_dir) }
 
     before do
       FileUtils.mkdir(pattern_dir) unless has_pattern_dir?
-      @file1 = Tempfile.new('grok', pattern_dir)
+      @file1 = File.new(File.join(pattern_dir, 'grok.pattern'), 'w+')
       @file1.write('WORD \b[2-5]\b')
       @file1.close
-      @file2 = Tempfile.new('grok', tmpdir)
+      @file2 = File.new(File.join(tmpdir, 'grok.pattern'), 'w+')
       @file2.write('WORD \b[0-1]\b')
       @file2.close
     end
@@ -722,24 +718,22 @@ describe LogStash::Filters::Grok do
     end
 
     after do
-      @file1.unlink
-      @file2.unlink
+      File.unlink @file1
+      File.unlink @file2
       FileUtils.remove_entry tmpdir
       FileUtils.rm_rf(pattern_dir) unless has_pattern_dir?
     end
   end
 
   describe "patterns with file glob" do
-    require 'tmpdir'
-    require 'tempfile'
 
-    let(:tmpdir) { Dir.mktmpdir(nil, "/tmp") }
+    let(:tmpdir) { Stud::Temporary.directory }
 
     before do
-      @file3 = Tempfile.new(['grok', '.pattern'], tmpdir)
+      @file3 = File.new(File.join(tmpdir, 'grok.pattern'), 'w+')
       @file3.write('WORD \b[0-1]\b')
       @file3.close
-      @file4 = Tempfile.new(['grok', '.pattern.old'], tmpdir)
+      @file4 = File.new(File.join(tmpdir, 'grok.pattern.old'), 'w+')
       @file4.write('WORD \b[2-5]\b')
       @file4.close
     end
@@ -753,23 +747,21 @@ describe LogStash::Filters::Grok do
     end
 
     after do
-      @file3.unlink
-      @file4.unlink
+      File.unlink @file3
+      File.unlink @file4
       FileUtils.remove_entry tmpdir
     end
   end
 
   describe "patterns with file glob on directory that contains subdirectories" do
-    require 'tmpdir'
-    require 'tempfile'
 
-    let(:tmpdir) { Dir.mktmpdir(nil, "/tmp") }
+    let(:tmpdir) { Stud::Temporary.directory }
 
     before do
-      @file3 = Tempfile.new(['grok', '.pattern'], tmpdir)
+      @file3 = File.new(File.join(tmpdir, 'grok.pattern'), 'w+')
       @file3.write('WORD \b[0-1]\b')
       @file3.close
-      Dir.mktmpdir(nil, tmpdir)
+      Dir.mkdir(File.join(tmpdir, "subdir"))
     end
 
     let(:config) do
@@ -781,7 +773,7 @@ describe LogStash::Filters::Grok do
     end
 
     after do
-      @file3.unlink
+      File.unlink @file3
       FileUtils.remove_entry tmpdir
     end
   end
