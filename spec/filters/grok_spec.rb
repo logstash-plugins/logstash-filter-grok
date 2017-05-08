@@ -759,6 +759,33 @@ describe LogStash::Filters::Grok do
     end
   end
 
+  describe "patterns with file glob on directory that contains subdirectories" do
+    require 'tmpdir'
+    require 'tempfile'
+
+    let(:tmpdir) { Dir.mktmpdir(nil, "/tmp") }
+
+    before do
+      @file3 = Tempfile.new(['grok', '.pattern'], tmpdir)
+      @file3.write('WORD \b[0-1]\b')
+      @file3.close
+      Dir.mktmpdir(nil, tmpdir)
+    end
+
+    let(:config) do
+      "filter { grok { patterns_dir => \"#{tmpdir}\" patterns_files_glob => \"*\" match => { \"message\" => \"%{WORD:word}\" } } }"
+    end
+
+    sample("message" => '0') do
+      insist { subject.get("tags") } == nil
+    end
+
+    after do
+      @file3.unlink
+      FileUtils.remove_entry tmpdir
+    end
+  end
+
   describe  "grok with nil coerced value" do
     config <<-CONFIG
       filter {
