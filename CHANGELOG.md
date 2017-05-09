@@ -1,3 +1,6 @@
+## 3.4.1
+  - Fix subdirectories in a pattern folder causing an exception in some cases
+
 ## 3.4.0
   - Add option to define patterns inline in the filter using `pattern_definitions` configuration.
 
