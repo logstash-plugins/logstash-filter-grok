@@ -390,7 +390,11 @@
 
         Dir.glob(path).each do |file|
           @logger.trace("Grok loading patterns from file", :path => file)
-          patternfiles << file unless File.directory?(file)
+          if File.directory?(file)
+            @logger.debug("Skipping path because it is a directory", :path => file)
+          else
+            patternfiles << file
+          end
         end
       end
       patternfiles
