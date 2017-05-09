@@ -138,7 +138,7 @@
   # `SYSLOGBASE` pattern which itself is defined by other patterns.
   #
   # Another option is to define patterns _inline_ in the filter using `pattern_definitions`.
-  # This is mostly for convenience and allows user to define a pattern which can be used just in that
+  # This is mostly for convenience and allows user to define a pattern which can be used just in that 
   # filter. This newly defined patterns in `pattern_definitions` will not be available outside of that particular `grok` filter.
   #
   class LogStash::Filters::Grok < LogStash::Filters::Base
@@ -168,7 +168,7 @@
     # necessarily need to define this yourself unless you are adding additional
     # patterns. You can point to multiple pattern directories using this setting.
     # Note that Grok will read all files in the directory matching the patterns_files_glob
-    # and assume it's a pattern file (including any tilde backup files).
+    # and assume it's a pattern file (including any tilde backup files). 
     # [source,ruby]
     #     patterns_dir => ["/opt/logstash/patterns", "/opt/logstash/extra_patterns"]
     #
@@ -183,9 +183,9 @@
     # The patterns are loaded when the pipeline is created.
     config :patterns_dir, :validate => :array, :default => []
 
-    # A hash of pattern-name and pattern tuples defining custom patterns to be used by
-    # the current filter. Patterns matching existing names will override the pre-existing
-    # definition. Think of this as inline patterns available just for this definition of
+    # A hash of pattern-name and pattern tuples defining custom patterns to be used by 
+    # the current filter. Patterns matching existing names will override the pre-existing 
+    # definition. Think of this as inline patterns available just for this definition of 
     # grok
     config :pattern_definitions, :validate => :hash, :default => {}
 
@@ -237,7 +237,7 @@
     config :overwrite, :validate => :array, :default => []
 
     attr_reader :timeout_enforcer
-
+    
     # Register default pattern paths
     @@patterns_path ||= Set.new
     @@patterns_path += [
@@ -298,7 +298,7 @@
 
       @patterns.each do |field, groks|
         success = match(groks, field, event)
-
+        
         if success
           matched = true
           break if @break_on_match
@@ -337,7 +337,7 @@
       @logger.warn("Grok regexp threw exception", :exception => e.message, :backtrace => e.backtrace, :class => e.class.name)
       return false
     end
-
+    
     private
     def match_against_groks(groks, field, input, event)
       input = input.to_s
@@ -351,7 +351,7 @@
           break if @break_on_match
         end
       end
-
+      
       matched
     end
 
