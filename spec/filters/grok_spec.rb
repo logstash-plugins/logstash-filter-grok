@@ -923,4 +923,19 @@ describe LogStash::Filters::Grok do
     end
   end
 
+  describe "after grok when the event is JSON serialised the field values are unchanged" do
+    config <<-CONFIG
+      filter {grok {match => ["message", "Failed password for (invalid user |)%{USERNAME:username} from %{IP:src_ip} port %{BASE10NUM:port}"] remove_field => ["message","severity"] add_tag => ["ssh_failure"]}}
+    CONFIG
+
+    sample('{"facility":"auth","message":"Failed password for testuser from 1.1.1.1 port 22"}') do
+      insist { subject["username"] } == "testuser"
+      insist { subject["port"] } == "22"
+      insist { subject["src_ip"] } == "1.1.1.1"
+      insist { LogStash::Json.dump(subject['username']) } == "\"testuser\""
+
+      insist { subject.to_json } =~ %r|{"@version":"1","@timestamp":"20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ","username":"testuser","src_ip":"1.1.1.1","port":"22","tags":\["ssh_failure"\]}|
+    end
+  end
+
 end
