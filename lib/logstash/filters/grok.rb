@@ -7,7 +7,7 @@
 
   # Parse arbitrary text and structure it.
   #
-  # Grok is currently the best way in logstash to parse crappy unstructured log
+  # Grok is currently the best way in Logstash to parse unstructured log
   # data into something structured and queryable.
   #
   # This tool is perfect for syslog logs, apache and other webserver logs, mysql
