@@ -14,7 +14,7 @@ END - GENERATED VARIABLES, DO NOT EDIT!
 
 [id="plugins-{type}-{plugin}"]
 
-=== Grok
+=== Grok filter plugin
 
 include::{include_path}/plugin_header.asciidoc[]
 
