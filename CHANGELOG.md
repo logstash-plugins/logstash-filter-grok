@@ -1,3 +1,6 @@
+## 3.4.3
+  - Docs: Add link to Grok Debugger tool
+
 ## 3.4.1
   - Fix subdirectories in a pattern folder causing an exception in some cases
 
