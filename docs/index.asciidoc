@@ -22,8 +22,7 @@ include::{include_path}/plugin_header.asciidoc[]
 
 Parse arbitrary text and structure it.
 
-Grok is currently the best way in logstash to parse crappy unstructured log
-data into something structured and queryable.
+Grok is a great way to parse unstructured log data into something structured and queryable.
 
 This tool is perfect for syslog logs, apache and other webserver logs, mysql
 logs, and in general, any log format that is generally written for humans
