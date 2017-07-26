@@ -883,7 +883,13 @@ describe LogStash::Filters::Grok do
       insist { subject.get("src_ip") } == "1.1.1.1"
       insist { LogStash::Json.dump(subject.get('username')) } == "\"testuser\""
 
-      insist { subject.to_json } =~ %r|{"src_ip":"1.1.1.1","@timestamp":"20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ","port":"22","@version":"1","username":"testuser","tags":\["ssh_failure"\]}|
+      insist { subject.to_json } =~ %r|"src_ip":"1.1.1.1"|
+      insist { subject.to_json } =~ %r|"@timestamp":"20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ"|
+      insist { subject.to_json } =~ %r|"port":"22"|
+      insist { subject.to_json } =~ %r|"@version":"1"|
+      insist { subject.to_json } =~ %r|"username"|i
+      insist { subject.to_json } =~ %r|"testuser"|
+      insist { subject.to_json } =~ %r|"tags":\["ssh_failure"\]}|
     end
   end
 
