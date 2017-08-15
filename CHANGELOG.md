@@ -1,3 +1,6 @@
+## 3.4.3
+  - Fix some documentation issues
+
 ## 3.4.1
   - Fix subdirectories in a pattern folder causing an exception in some cases
 
