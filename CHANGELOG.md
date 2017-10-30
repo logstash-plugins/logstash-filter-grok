@@ -1,3 +1,6 @@
+## 3.4.4
+  - Docs: Add link to Grok Debugger tool
+
 ## 3.4.3
   - Fix some documentation issues
 

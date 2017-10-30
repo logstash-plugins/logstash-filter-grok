@@ -33,7 +33,9 @@ Logstash ships with about 120 patterns by default. You can find them here:
 your own trivially. (See the `patterns_dir` setting)
 
 If you need help building patterns to match your logs, you will find the
-<http://grokdebug.herokuapp.com> and <http://grokconstructor.appspot.com/> applications quite useful!
+https://www.elastic.co/guide/en/kibana/current/xpack-grokdebugger.html[Grok Debugger]
+tool quite useful! The Grok Debugger is an X-Pack feature under the Basic License and is
+therefore *free to use*.
 
 ==== Grok Basics
 
