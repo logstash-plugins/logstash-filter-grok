@@ -287,19 +287,18 @@
           @patterns[field] << grok
         end
       end # @match.each
+      @match_counter = metric.counter(:matches)
+      @failure_counter = metric.counter(:failures)
     end # def register
 
     public
     def filter(event)
       matched = false
-      done = false
 
-      @logger.debug? and @logger.debug("Running grok filter", :event => event);
+      @logger.debug? and @logger.debug("Running grok filter", :event => event)
 
       @patterns.each do |field, groks|
-        success = match(groks, field, event)
-        
-        if success
+        if match(groks, field, event)
           matched = true
           break if @break_on_match
         end
@@ -307,10 +306,10 @@
       end # @patterns.each
 
       if matched
-        metric.increment(:matches)
+        @match_counter.increment(1)
         filter_matched(event)
       else
-        metric.increment(:failures)
+        @failure_counter.increment(1)
         @tag_on_failure.each {|tag| event.tag(tag)}
       end
 
@@ -345,7 +344,7 @@
       groks.each do |grok|
         # Convert anything else to string (number, hash, etc)
 
-        matched = @timeout_enforcer.grok_till_timeout(event, grok, field, input) { grok.execute(input) }
+        matched = @timeout_enforcer.grok_till_timeout(grok, field, input)
         if matched
           grok.capture(matched) {|field, value| handle(field, value, event)}
           break if @break_on_match
