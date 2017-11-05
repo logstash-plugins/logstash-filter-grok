@@ -1,5 +1,3 @@
-java_import java.util.concurrent.locks.ReentrantLock
-
 class LogStash::Filters::Grok::TimeoutEnforcer
   attr_reader :running
 
@@ -10,15 +8,14 @@ class LogStash::Filters::Grok::TimeoutEnforcer
 
     # Stores running matches with their start time, this is used to cancel long running matches
     # Is a map of Thread => start_time
-    @threads_to_start_time = {}
-    @state_lock = ReentrantLock.new
+    @threads_to_start_time = java.util.concurrent.ConcurrentHashMap.new
   end
 
-  def grok_till_timeout(event, grok, field, value)
+  def grok_till_timeout(grok, field, value)
     begin
       thread = java.lang.Thread.currentThread()
       start_thread_groking(thread)
-      yield
+      grok.execute(value)
     rescue InterruptedRegexpError => e
       raise ::LogStash::Filters::Grok::TimeoutException.new(grok, field, value)
     ensure
@@ -27,7 +24,7 @@ class LogStash::Filters::Grok::TimeoutEnforcer
       # It may appear that this should go in #stop_thread_groking but that would actually
       # break functionality! If this were moved there we would clear the interrupt
       # immediately after setting it in #cancel_timed_out, hence this MUST be here
-      thread.interrupted
+      java.lang.Thread.interrupted
     end
   end
 
@@ -64,44 +61,26 @@ class LogStash::Filters::Grok::TimeoutEnforcer
 
   def start_thread_groking(thread)
     # Clear any interrupts from any previous invocations that were not caught by Joni
-    thread.interrupted
-    synchronize do
-      @threads_to_start_time[thread] = java.lang.System.nanoTime()
-    end
+    java.lang.Thread.interrupted
+    @threads_to_start_time.put(thread, java.lang.System.nanoTime)
   end
 
   def stop_thread_groking(thread)
-    synchronize do
-      @threads_to_start_time.delete(thread)
-    end
+    @threads_to_start_time.delete(thread)
   end
 
   def cancel_timed_out!
-    synchronize do
-      @threads_to_start_time.each do |thread,start_time|
-        now = java.lang.System.nanoTime # save ourselves some nanotime calls
-        elapsed = java.lang.System.nanoTime - start_time
-        if elapsed > @timeout_nanos
-          elapsed_millis = elapsed / 1000
-          thread.interrupt()
-          # Ensure that we never attempt to cancel this thread twice in the event
-          # of weird races
-          stop_thread_groking(thread)
-        end
+    now = java.lang.System.nanoTime # save ourselves some nanotime calls
+    @threads_to_start_time.entry_set.each do |entry|
+      start_time = entry.get_value
+      if start_time < now && now - start_time > @timeout_nanos
+        thread  = entry.get_key
+        thread.interrupt()
+        # Ensure that we never attempt to cancel this thread twice in the event
+        # of weird races
+        stop_thread_groking(thread)
       end
     end
   end
-
-  # We use this instead of a Mutex because JRuby mutexes are interruptible
-  # We actually don't want that behavior since we always clear the interrupt in
-  # grok_till_timeout
-  def synchronize
-    # The JRuby Mutex uses lockInterruptibly which is what we DO NOT want
-    @state_lock.lock()
-    yield
-  ensure
-    @state_lock.unlock()
-  end
-
 
 end
