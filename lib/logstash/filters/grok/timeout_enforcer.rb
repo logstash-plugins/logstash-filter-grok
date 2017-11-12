@@ -9,6 +9,7 @@ class LogStash::Filters::Grok::TimeoutEnforcer
     # Stores running matches with their start time, this is used to cancel long running matches
     # Is a map of Thread => start_time
     @threads_to_start_time = java.util.concurrent.ConcurrentHashMap.new
+    @cancel_mutex = Mutex.new
   end
 
   def grok_till_timeout(grok, field, value)
@@ -19,12 +20,18 @@ class LogStash::Filters::Grok::TimeoutEnforcer
     rescue InterruptedRegexpError => e
       raise ::LogStash::Filters::Grok::TimeoutException.new(grok, field, value)
     ensure
-      stop_thread_groking(thread)
-      # Clear any interrupts from any previous invocations that were not caught by Joni
-      # It may appear that this should go in #stop_thread_groking but that would actually
-      # break functionality! If this were moved there we would clear the interrupt
-      # immediately after setting it in #cancel_timed_out, hence this MUST be here
-      java.lang.Thread.interrupted
+      unless stop_thread_groking(thread)
+        @cancel_mutex.lock
+        begin
+          # Clear any interrupts from any previous invocations that were not caught by Joni
+          # It may appear that this should go in #stop_thread_groking but that would actually
+          # break functionality! If this were moved there we would clear the interrupt
+          # immediately after setting it in #cancel_timed_out, hence this MUST be here
+          java.lang.Thread.interrupted
+        ensure
+          @cancel_mutex.unlock
+        end
+      end
     end
   end
 
@@ -66,7 +73,7 @@ class LogStash::Filters::Grok::TimeoutEnforcer
   end
 
   def stop_thread_groking(thread)
-    @threads_to_start_time.delete(thread)
+    @threads_to_start_time.remove(thread)
   end
 
   def cancel_timed_out!
@@ -75,10 +82,16 @@ class LogStash::Filters::Grok::TimeoutEnforcer
       start_time = entry.get_value
       if start_time < now && now - start_time > @timeout_nanos
         thread  = entry.get_key
-        thread.interrupt()
         # Ensure that we never attempt to cancel this thread twice in the event
         # of weird races
-        stop_thread_groking(thread)
+        if stop_thread_groking(thread)
+          @cancel_mutex.lock
+          begin
+            thread.interrupt()
+          ensure
+            @cancel_mutex.unlock
+          end
+        end
       end
     end
   end
