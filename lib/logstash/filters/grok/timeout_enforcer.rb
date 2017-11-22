@@ -72,6 +72,7 @@ class LogStash::Filters::Grok::TimeoutEnforcer
     @threads_to_start_time.put(thread, java.lang.System.nanoTime)
   end
 
+  # Returns falsy in case there was no Grok execution in progress for the thread
   def stop_thread_groking(thread)
     @threads_to_start_time.remove(thread)
   end
@@ -82,8 +83,13 @@ class LogStash::Filters::Grok::TimeoutEnforcer
       start_time = entry.get_value
       if start_time < now && now - start_time > @timeout_nanos
         thread  = entry.get_key
-        # Ensure that we never attempt to cancel this thread twice in the event
-        # of weird races
+        # Ensure that we never attempt to cancel this thread unless a Grok execution is in progress
+        # Theoretically there is a race condition here in case the entry's grok action changed
+        # between evaluating the above condition on the start_time and calling stop_thread_groking
+        # Practically this is impossible, since it would require a whole loop of writing to an
+        # output, pulling new input events and starting a new Grok execution in worker thread
+        # in between the above `if start_time < now && now - start_time > @timeout_nanos` and
+        # the call to `stop_thread_groking`.
         if stop_thread_groking(thread)
           @cancel_mutex.lock
           begin
