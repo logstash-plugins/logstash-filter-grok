@@ -1,3 +1,6 @@
+## 3.4.5
+  - Major performance improvements due to reduced locking
+
 ## 3.4.4
   - Update gemspec summary
 
