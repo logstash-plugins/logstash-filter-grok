@@ -889,7 +889,7 @@ describe LogStash::Filters::Grok do
       insist { subject.to_json } =~ %r|"@version":"1"|
       insist { subject.to_json } =~ %r|"username"|i
       insist { subject.to_json } =~ %r|"testuser"|
-      insist { subject.to_json } =~ %r|"tags":\["ssh_failure"\]}|
+      insist { subject.to_json } =~ %r|"tags":\["ssh_failure"\]|
     end
   end
 
