@@ -1,5 +1,8 @@
-## 3.4.5
+## 4.0.0
   - Major performance improvements due to reduced locking
+
+## 3.4.5
+  - version yanked due to breaking changes within .patch release cause logstash crashes in < 5.6
 
 ## 3.4.4
   - Update gemspec summary
