@@ -27,7 +27,7 @@ class LogStash::Filters::Grok::TimeoutEnforcer
           # It may appear that this should go in #stop_thread_groking but that would actually
           # break functionality! If this were moved there we would clear the interrupt
           # immediately after setting it in #cancel_timed_out, hence this MUST be here
-          java.lang.Thread.interrupted
+          clear_interrupts
         ensure
           @cancel_mutex.unlock
         end
@@ -61,14 +61,24 @@ class LogStash::Filters::Grok::TimeoutEnforcer
 
   private
 
+  # Clear any interrupts on the current Java and Ruby thread that resulted from previous invocations
+  # and that were not caught by Joni
+  def clear_interrupts
+    java.lang.Thread.interrupted
+    if Thread.pending_interrupt?
+      Thread.handle_interrupt(Object => :immediate) {
+        # Do nothing just clearing the interrupt
+      }
+    end
+  end
+
   # These methods are private in large part because if they aren't called
   # in specific sequence and used together in specific ways the interrupt
   # behavior will be incorrect. Do NOT use or modify these methods unless
   # you know what you are doing!
 
   def start_thread_groking(thread)
-    # Clear any interrupts from any previous invocations that were not caught by Joni
-    java.lang.Thread.interrupted
+    clear_interrupts
     @threads_to_start_time.put(thread, java.lang.System.nanoTime)
   end
 
