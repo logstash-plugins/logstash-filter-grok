@@ -1,3 +1,6 @@
+## 4.0.1
+  - Fix a potential race
+
 ## 4.0.0
   - Major performance improvements due to reduced locking
 
