@@ -3,6 +3,7 @@
   require "logstash/namespace"
   require "logstash/environment"
   require "logstash/patterns/core"
+  require "grok-pure" # rubygem 'jls-grok'
   require "set"
 
   # Parse arbitrary text and structure it.
@@ -246,18 +247,12 @@
     ]
 
     public
-    def initialize(params)
-      super(params)
+    def register
       # a cache of capture name handler methods.
       @handlers = {}
 
       @timeout_enforcer = TimeoutEnforcer.new(@logger, @timeout_millis * 1000000)
       @timeout_enforcer.start! unless @timeout_millis == 0
-    end
-
-    public
-    def register
-      require "grok-pure" # rubygem 'jls-grok'
 
       @patternfiles = []
 

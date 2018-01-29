@@ -1,3 +1,6 @@
+## 4.0.2
+  - Fixed resource leak where this plugin might get double initialized during plugin reload, leaking a thread + some objects
+
 ## 4.0.1
   - Fix a potential race
 
