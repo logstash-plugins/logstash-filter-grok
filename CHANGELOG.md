@@ -1,3 +1,6 @@
+## 4.0.3
+  - Fixed memory leak when run on JRuby 1.x (Logstash 5.x) [#135](https://github.com/logstash-plugins/logstash-filter-grok/issues/135)
+  
 ## 4.0.2
   - Fixed resource leak where this plugin might get double initialized during plugin reload, leaking a thread + some objects
 

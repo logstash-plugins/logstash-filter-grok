@@ -56,7 +56,7 @@ class LogStash::Filters::Grok::TimeoutEnforcer
 
   def cancel_timed_out!
     now = java.lang.System.nanoTime # save ourselves some nanotime calls
-    @threads_to_start_time.forEach do |thread, start_time|
+    @threads_to_start_time.keySet.each do |thread|
       # Use compute to lock this value
       @threads_to_start_time.computeIfPresent(thread) do |thread, start_time|
         if start_time < now && now - start_time > @timeout_nanos
