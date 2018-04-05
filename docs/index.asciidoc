@@ -206,20 +206,30 @@ If `true`, keep empty captures as event fields.
   * Value type is <<hash,hash>>
   * Default value is `{}`
 
-A hash of matches of field => value
+A hash that maps a source field to one or more patterns that will be used
 
 For example:
 [source,ruby]
     filter {
-      grok { match => { "message" => "Duration: %{NUMBER:duration}" } }
+      grok {
+        match => {
+          "message" => "Duration: %{NUMBER:duration}"
+        }
+      }
     }
 
-If you need to match multiple patterns against a single field, the value can be an array of patterns
+If you need to match multiple patterns against a single field, the value can be an array of patterns:
 [source,ruby]
     filter {
-      grok { match => { "message" => [ "Duration: %{NUMBER:duration}", "Speed: %{NUMBER:speed}" ] } }
+      grok {
+        match => {
+          "message" => [
+            "Duration: %{NUMBER:duration}",
+            "Speed: %{NUMBER:speed}"
+          ]
+        }
+      }
     }
-
 
 [id="plugins-{type}s-{plugin}-named_captures_only"]
 ===== `named_captures_only` 
