@@ -1,18 +1,17 @@
 ---
-sudo: false
+sudo: required
+services: docker
+addons:
+  apt:
+    packages:
+      - docker-ce
 language: ruby
-cache: bundler
 matrix:
   include:
-  - rvm: jruby-9.1.13.0
-    env: LOGSTASH_BRANCH=master
-  - rvm: jruby-9.1.13.0
-    env: LOGSTASH_BRANCH=6.x
-  - rvm: jruby-9.1.13.0
-    env: LOGSTASH_BRANCH=6.0
-  - rvm: jruby-1.7.27
-    env: LOGSTASH_BRANCH=5.6
+  - env: ELASTIC_STACK_VERSION=5.6.9
+  - env: ELASTIC_STACK_VERSION=6.2.4
+  - env: ELASTIC_STACK_VERSION=6.3.0-SNAPSHOT
+  - env: ELASTIC_STACK_VERSION=7.0.0-alpha1-SNAPSHOT
   fast_finish: true
 install: true
-script: ci/build.sh
-jdk: oraclejdk8
+script: ci/unit/docker-test.sh
