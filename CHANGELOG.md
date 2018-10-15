@@ -1,3 +1,7 @@
+## 4.0.4
+  - Added info and link to documentation for logstash-filter-dissect as another option for extracting unstructured event data into fields
+  [#144](https://github.com/logstash-plugins/logstash-filter-grok/issues/144)
+
 ## 4.0.3
   - Fixed memory leak when run on JRuby 1.x (Logstash 5.x) [#135](https://github.com/logstash-plugins/logstash-filter-grok/issues/135)
   
