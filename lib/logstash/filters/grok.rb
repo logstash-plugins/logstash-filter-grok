@@ -237,6 +237,24 @@
     # will be parsed and `hello world` will overwrite the original message.
     config :overwrite, :validate => :array, :default => []
 
+    # The target key to store matched fields under.
+    #
+    # This also provides a workaround for storing structured fields
+    # in the Oniguruma syntax, eg. for storing metadata:
+    # [source,ruby]
+    #     filter {
+    #       grok {
+    #         match => { "message" => "\[(?<request_id>REQ-[0-9a-f]+)\]: %{GREEDYDATA:request}" }
+    #         target => '@metadata'
+    #       }
+    #     }
+    #
+    # For the line `[REQ-dd7126fa833]: POST /entry`, this would store `REQ-dd7126fa833` as
+    # `[@metadata][request_id]` and `POST /entry` as `[@metadata][request]`.
+    #
+    # If no target is provided, fields are stored at the root of the event.
+    config :target, :validate => :string
+
     attr_reader :timeout_enforcer
     
     # Register default pattern paths
@@ -341,7 +359,7 @@
 
         matched = @timeout_enforcer.grok_till_timeout(grok, field, input)
         if matched
-          grok.capture(matched) {|field, value| handle(field, value, event)}
+          grok.capture(matched) {|field, value| handle(field_ref(field), value, event)}
           break if @break_on_match
         end
       end
@@ -409,6 +427,21 @@
       pattern_definitions.each do |name, pattern|
         next if pattern.nil?
         grok.add_pattern(name, pattern.chomp)
+      end
+    end
+
+    private
+    # construct the correct Event field reference for given field_name, taking into account @target
+    # @param field_name [String] the field name.
+    # @return [String] fully qualified Event field reference also taking into account @target prefix
+    def field_ref(field_name)
+      return field_name if !@target
+
+      target = "[#{@target}]" unless @target.start_with?("[")
+      if field_name.start_with?("[")
+        "#{target}#{field_name}"
+      else
+        "#{target}[#{field_name}]"
       end
     end
 

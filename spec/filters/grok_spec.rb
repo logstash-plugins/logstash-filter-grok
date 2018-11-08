@@ -929,4 +929,37 @@ describe LogStash::Filters::Grok do
     end
   end
 
+  describe "grok with target stores fields under key" do
+    config <<-CONFIG
+      filter {
+        grok {
+          match => { "message" => "\[(?<id>REQ-[0-9a-f]+)\]: %{USERNAME:[session][username]}: %{GREEDYDATA:action}" }
+          target => 'request'
+        }
+      }
+    CONFIG
+
+    sample "[REQ-dd7126fa833]: mporter: POST /entry" do
+      insist { subject.get("[request][id]") == "REQ-dd7126fa833" }
+      insist { subject.get("[request][session][username]") == "mporter" }
+      insist { subject.get("[request][action]") == "POST /entry"}
+    end
+  end
+
+  describe "grok with nested target stores fields under key" do
+    config <<-CONFIG
+      filter {
+        grok {
+          match => { "message" => "\[(?<id>REQ-[0-9a-f]+)\]: %{GREEDYDATA:action}" }
+          target => '[@metadata][request]'
+        }
+      }
+    CONFIG
+
+    sample "[REQ-dd7126fa833]: POST /entry" do
+      insist { subject.get("[@metadata][request][id]") == "REQ-dd7126fa833" }
+      insist { subject.get("[@metadata][request][action]") == "POST /entry"}
+    end
+  end
+
 end
