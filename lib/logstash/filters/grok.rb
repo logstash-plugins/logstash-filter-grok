@@ -2,6 +2,7 @@
   require "logstash/filters/base"
   require "logstash/namespace"
   require "logstash/environment"
+  require "logstash/event"
   require "logstash/patterns/core"
   require "grok-pure" # rubygem 'jls-grok'
   require "set"
@@ -237,6 +238,14 @@
     # will be parsed and `hello world` will overwrite the original message.
     config :overwrite, :validate => :array, :default => []
 
+    # If this attribute is set, the output of this filter will be an array
+    # of objects written to the key supplied in this config value.
+    #
+    # If this attribute is not set and the input is an array then context of
+    # the captures will be lost and values will be grouped by capture name
+    # rather than the message it came from.
+    config :output_objects, :validate => :string, :default => nil
+
     attr_reader :timeout_enforcer
     
     # Register default pattern paths
@@ -334,6 +343,8 @@
     
     private
     def match_against_groks(groks, field, input, event)
+      target_event = @output_objects ? LogStash::Event.new : event
+
       input = input.to_s
       matched = false
       groks.each do |grok|
@@ -341,11 +352,18 @@
 
         matched = @timeout_enforcer.grok_till_timeout(grok, field, input)
         if matched
-          grok.capture(matched) {|field, value| handle(field, value, event)}
+          grok.capture(matched) {|field, value| handle(field, value, target_event)}
           break if @break_on_match
         end
       end
-      
+
+      if @output_objects
+        output_array = event.get(@output_objects)
+        output_array = [] unless output_array.is_a? Array
+        output_array << target_event.to_hash
+        event.set(@output_objects, output_array)
+      end
+
       matched
     end
 

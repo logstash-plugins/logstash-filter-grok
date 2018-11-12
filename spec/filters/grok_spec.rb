@@ -44,6 +44,56 @@ describe LogStash::Filters::Grok do
     end
   end
 
+  describe "build object from message" do
+    config <<-CONFIG
+      filter {
+        grok {
+          match => { "message" => "%{SYSLOGLINE}" }
+          output_objects => "syslogs"
+        }
+      }
+    CONFIG
+
+    sample "Mar 16 00:01:25 evita postfix/smtpd[1713]: connect from camomile.cloud9.net[168.100.1.3]" do
+      insist { subject.get("syslogs")[0]["tags"].nil? }
+      insist { subject.get("syslogs")[0]["logsource"] } == "evita"
+      insist { subject.get("syslogs")[0]["timestamp"] } == "Mar 16 00:01:25"
+      insist { subject.get("syslogs")[0]["message"] } == "connect from camomile.cloud9.net[168.100.1.3]"
+      insist { subject.get("syslogs")[0]["program"] } == "postfix/smtpd"
+      insist { subject.get("syslogs")[0]["pid"] } == "1713"
+    end
+  end
+
+  describe "build objects from array of messages" do
+    config <<-CONFIG
+      filter {
+        grok {
+          match => { "message" => "%{SYSLOGLINE}" }
+          output_objects => "syslogs"
+        }
+      }
+    CONFIG
+
+    sample("message" => [
+      "Mar 16 00:01:25 evita postfix/smtpd[1713]: connect from camomile.cloud9.net[168.100.1.3]",
+      "Mar 29 04:20:32 evita postfix/smtpd[1737]: connect from steve.cloud9.net[168.100.1.4]"
+    ]) do
+      insist { subject.get("syslogs")[0]["tags"].nil? }
+      insist { subject.get("syslogs")[0]["logsource"] } == "evita"
+      insist { subject.get("syslogs")[0]["timestamp"] } == "Mar 16 00:01:25"
+      insist { subject.get("syslogs")[0]["message"] } == "connect from camomile.cloud9.net[168.100.1.3]"
+      insist { subject.get("syslogs")[0]["program"] } == "postfix/smtpd"
+      insist { subject.get("syslogs")[0]["pid"] } == "1713"
+
+      insist { subject.get("syslogs")[1]["tags"].nil? }
+      insist { subject.get("syslogs")[1]["logsource"] } == "evita"
+      insist { subject.get("syslogs")[1]["timestamp"] } == "Mar 29 04:20:32"
+      insist { subject.get("syslogs")[1]["message"] } == "connect from steve.cloud9.net[168.100.1.4]"
+      insist { subject.get("syslogs")[1]["program"] } == "postfix/smtpd"
+      insist { subject.get("syslogs")[1]["pid"] } == "1737"
+    end
+  end
+
   describe "ietf 5424 syslog line" do
     # The logstash config goes here.
     # At this time, only filters are supported.
