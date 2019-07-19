@@ -850,25 +850,8 @@ describe LogStash::Filters::Grok do
       plugin.register
     end
 
-    it "should start the timeout enforcer" do
-      expect(plugin.timeout_enforcer.running).to be true
-    end
-
-    context "with the timeout enforcer disabled" do
-      let(:config) { super.merge("timeout_millis" => 0) }
-
-      it "should not start the timeout enforcer" do
-        expect(plugin.timeout_enforcer.running).to be false
-      end
-    end
-
     it "should close cleanly" do
       expect { plugin.do_close }.not_to raise_error
-    end
-
-    it "should stop the timeout enforcer" do
-      plugin.do_close
-      expect(plugin.timeout_enforcer.running).to be false
     end
   end
 
@@ -929,4 +912,37 @@ describe LogStash::Filters::Grok do
     end
   end
 
+
+  describe "direct plugin testing" do
+    subject do
+      plugin = LogStash::Filters::Grok.new(options)
+      plugin.register
+      plugin
+    end
+
+    let(:data) { {"message" => message} }
+    let(:event) { LogStash::Event.new(data) }
+
+    context 'when timeouts are explicitly disabled' do
+      let(:options) do
+        {
+          "timeout_millis" => 0
+        }
+      end
+
+      context 'when given a pathological input' do
+        let(:message) { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+        let(:options) { super().merge("match" => { "message" => "(.*a){30}" }) }
+
+        it 'blocks for at least 3 seconds' do
+          blocking_exception_class = Class.new(::Exception) # avoid RuntimeError
+          expect do
+            Timeout.timeout(3, blocking_exception_class) do
+              subject.filter(event)
+            end
+          end.to raise_exception(blocking_exception_class)
+        end
+      end
+    end
+  end
 end

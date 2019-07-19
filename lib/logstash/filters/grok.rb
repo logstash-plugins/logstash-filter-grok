@@ -5,6 +5,7 @@
   require "logstash/patterns/core"
   require "grok-pure" # rubygem 'jls-grok'
   require "set"
+  require "timeout"
 
   # Parse arbitrary text and structure it.
   #
@@ -144,8 +145,6 @@
   #
   class LogStash::Filters::Grok < LogStash::Filters::Base
     config_name "grok"
-    require "logstash/filters/grok/timeout_enforcer"
-    require "logstash/filters/grok/timeout_exception"
 
     # A hash of matches of field => value
     #
@@ -237,8 +236,6 @@
     # will be parsed and `hello world` will overwrite the original message.
     config :overwrite, :validate => :array, :default => []
 
-    attr_reader :timeout_enforcer
-    
     # Register default pattern paths
     @@patterns_path ||= Set.new
     @@patterns_path += [
@@ -246,13 +243,9 @@
       LogStash::Environment.pattern_path("*")
     ]
 
-    public
     def register
       # a cache of capture name handler methods.
       @handlers = {}
-
-      @timeout_enforcer = TimeoutEnforcer.new(@logger, @timeout_millis * 1000000)
-      @timeout_enforcer.start! unless @timeout_millis == 0
 
       @patternfiles = []
 
@@ -284,9 +277,13 @@
       end # @match.each
       @match_counter = metric.counter(:matches)
       @failure_counter = metric.counter(:failures)
+
+      # divide by float to allow fractionnal seconds, the Timeout class timeout value is in seconds but the underlying
+      # executor resolution is in microseconds so fractionnal second parameter down to microseconds is possible.
+      # see https://github.com/jruby/jruby/blob/9.2.7.0/core/src/main/java/org/jruby/ext/timeout/Timeout.java#L125
+      @timeout_seconds = @timeout_millis / 1000.0
     end # def register
 
-    public
     def filter(event)
       matched = false
 
@@ -309,13 +306,17 @@
       end
 
       @logger.debug? and @logger.debug("Event now: ", :event => event)
-    rescue ::LogStash::Filters::Grok::TimeoutException => e
+    rescue GrokTimeoutException => e
       @logger.warn(e.message)
       metric.increment(:timeouts)
       event.tag(@tag_on_timeout)
     end # def filter
 
+    def close
+    end
+
     private
+
     def match(groks, field, event)
       input = event.get(field)
       if input.is_a?(Array)
@@ -331,15 +332,13 @@
       @logger.warn("Grok regexp threw exception", :exception => e.message, :backtrace => e.backtrace, :class => e.class.name)
       return false
     end
-    
-    private
+
     def match_against_groks(groks, field, input, event)
       input = input.to_s
       matched = false
       groks.each do |grok|
         # Convert anything else to string (number, hash, etc)
-
-        matched = @timeout_enforcer.grok_till_timeout(grok, field, input)
+        matched = grok_till_timeout(grok, field, input)
         if matched
           grok.capture(matched) {|field, value| handle(field, value, event)}
           break if @break_on_match
@@ -349,7 +348,14 @@
       matched
     end
 
-    private
+    def grok_till_timeout(grok, field, value)
+      begin
+        @timeout_seconds > 0.0 ? Timeout.timeout(@timeout_seconds, TimeoutError) { grok.execute(value) } : grok.execute(value)
+      rescue TimeoutError
+        raise GrokTimeoutException.new(grok, field, value)
+      end
+    end
+
     def handle(field, value, event)
       return if (value.nil? || (value.is_a?(String) && value.empty?)) unless @keep_empty_captures
 
@@ -373,7 +379,6 @@
       end
     end
 
-    private
     def patterns_files_from_paths(paths, glob)
       patternfiles = []
       @logger.debug("Grok patterns path", :paths => paths)
@@ -394,7 +399,6 @@
       patternfiles
     end # def patterns_files_from_paths
 
-    private
     def add_patterns_from_files(paths, grok)
       paths.each do |path|
         if !File.exists?(path)
@@ -404,7 +408,6 @@
       end
     end # def add_patterns_from_files
 
-    private
     def add_patterns_from_inline_definition(pattern_definitions, grok)
       pattern_definitions.each do |name, pattern|
         next if pattern.nil?
@@ -412,8 +415,27 @@
       end
     end
 
-    def close
-      @timeout_enforcer.stop!
-    end
+    class TimeoutError < RuntimeError; end
 
+    class GrokTimeoutException < Exception
+      attr_reader :grok, :field, :value
+
+      def initialize(grok, field, value)
+        @grok = grok
+        @field = field
+        @value = value
+      end
+
+      def message
+        "Timeout executing grok '#{@grok.pattern}' against field '#{field}' with value '#{trunc_value}'!"
+      end
+
+      def trunc_value
+        if value.size <= 255 # If no more than 255 chars
+          value
+        else
+          "Value too large to output (#{value.bytesize} bytes)! First 255 chars are: #{value[0..255]}"
+        end
+      end
+    end
   end # class LogStash::Filters::Grok
