@@ -1,3 +1,6 @@
+## 4.1.0
+ - Changed timeout handling using the Timeout class [#147](https://github.com/logstash-plugins/logstash-filter-grok/pull/147)
+
 ## 4.0.4
   - Added info and link to documentation for logstash-filter-dissect as another option for extracting unstructured event data into fields
   [#144](https://github.com/logstash-plugins/logstash-filter-grok/issues/144)
