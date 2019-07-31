@@ -1,3 +1,6 @@
+## 4.1.1
+ - Fix formatting for code sample [#tbd](https://github.com/logstash-plugins/logstash-filter-grok/pull/tbd)
+
 ## 4.1.0
  - Changed timeout handling using the Timeout class [#147](https://github.com/logstash-plugins/logstash-filter-grok/pull/147)
 
