@@ -143,15 +143,21 @@ For example, doing the postfix queue id example as above:
 
 Then use the `patterns_dir` setting in this plugin to tell logstash where
 your custom patterns directory is. Here's a full example with a sample log:
+
 [source,ruby]
+-----
     Jan  1 06:25:43 mailserver14 postfix/cleanup[21403]: BEF25A72965: message-id=<20130101142543.5828399CCAF@mailserver14.example.com>
+-----
+
 [source,ruby]
+-----
     filter {
       grok {
         patterns_dir => ["./patterns"]
         match => { "message" => "%{SYSLOGBASE} %{POSTFIX_QUEUEID:queue_id}: %{GREEDYDATA:syslog_message}" }
       }
     }
+-----
 
 The above will match and result in the following fields:
 
