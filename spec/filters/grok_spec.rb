@@ -199,7 +199,7 @@ describe LogStash::Filters::Grok do
 
     sample "400 454.33" do
       insist { subject.get("foo") } == 400
-      insist { subject.get("foo") }.is_a?(Fixnum)
+      insist { subject.get("foo") }.is_a?(Integer)
       insist { subject.get("bar") } == 454.33
       insist { subject.get("bar") }.is_a?(Float)
     end
