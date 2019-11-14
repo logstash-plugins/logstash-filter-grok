@@ -412,7 +412,7 @@ describe LogStash::Filters::Grok do
       filter {
         grok {
           match => {
-            message => "(.*a){30}"
+            "message" => "(.*a){30}"
           }
           timeout_millis => 100
         }
@@ -420,6 +420,51 @@ describe LogStash::Filters::Grok do
     CONFIG
 
     sample "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" do
+      expect(subject.get("tags")).to include("_groktimeout")
+      expect(subject.get("tags")).not_to include("_grokparsefailure")
+    end
+  end
+
+  describe "no timeout on failure with multiple patterns (when timeout not grouped)" do
+    config <<-CONFIG
+      filter {
+        grok {
+          match => {
+            "message" => [
+              "(.*f){20}", "(.*e){20}", "(.*d){20}", "(.*c){20}", "(.*b){20}",
+              "(.*a){25}", "(.*a){24}", "(.*a){23}", "(.*a){22}", "(.*a){21}",
+              "(.*a){20}"
+            ]
+          }
+          timeout_millis => 500
+          timeout_grouped => false
+        }
+      }
+    CONFIG
+
+    sample( 'b' * 10 + 'c' * 10 + 'd' * 10 + 'e' * 10 + ' ' + 'a' * 20 ) do
+      insist { subject.get("tags") }.nil?
+    end
+  end
+
+  describe "timeout on grouped (multi-pattern) failure" do
+    config <<-CONFIG
+      filter {
+        grok {
+          match => {
+            "message" => [
+              "(.*f){20}", "(.*e){20}", "(.*d){20}", "(.*c){20}", "(.*b){20}",
+              "(.*a){25}", "(.*a){24}", "(.*a){23}", "(.*a){22}", "(.*a){21}",
+              "(.*a){20}"
+            ]
+          }
+          timeout_millis => 500
+          timeout_grouped => true
+        }
+      }
+    CONFIG
+
+    sample( 'b' * 10 + 'c' * 10 + 'd' * 10 + 'e' * 10 + ' ' + 'a' * 20 ) do
       expect(subject.get("tags")).to include("_groktimeout")
       expect(subject.get("tags")).not_to include("_grokparsefailure")
     end
