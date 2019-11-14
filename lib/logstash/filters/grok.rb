@@ -140,10 +140,14 @@
   # `SYSLOGBASE` pattern which itself is defined by other patterns.
   #
   # Another option is to define patterns _inline_ in the filter using `pattern_definitions`.
-  # This is mostly for convenience and allows user to define a pattern which can be used just in that 
+  # This is mostly for convenience and allows user to define a pattern which can be used just in that
   # filter. This newly defined patterns in `pattern_definitions` will not be available outside of that particular `grok` filter.
   #
   class LogStash::Filters::Grok < LogStash::Filters::Base
+    require 'logstash/filters/grok/timeout_support'
+
+    include TimeoutSupport
+
     config_name "grok"
 
     # A hash of matches of field => value
@@ -168,7 +172,7 @@
     # necessarily need to define this yourself unless you are adding additional
     # patterns. You can point to multiple pattern directories using this setting.
     # Note that Grok will read all files in the directory matching the patterns_files_glob
-    # and assume it's a pattern file (including any tilde backup files). 
+    # and assume it's a pattern file (including any tilde backup files).
     # [source,ruby]
     #     patterns_dir => ["/opt/logstash/patterns", "/opt/logstash/extra_patterns"]
     #
@@ -214,6 +218,12 @@
     # Actual timeout is approximate based on a 250ms quantization.
     # Set to 0 to disable timeouts
     config :timeout_millis, :validate => :number, :default => 30000
+
+    # Group timeout for multiple patterns instead of having a timeout per pattern.
+    # When set to true timeout_millis effectively becomes a timeout over several patterns.
+    # Default is false due backwards compatibility.
+    # Has only an effect when timeout_millis > 0
+    config :timeout_grouped, :validate => :boolean, :default => false
 
     # Tag to apply if a grok regexp times out.
     config :tag_on_timeout, :validate => :string, :default => '_groktimeout'
@@ -278,10 +288,7 @@
       @match_counter = metric.counter(:matches)
       @failure_counter = metric.counter(:failures)
 
-      # divide by float to allow fractionnal seconds, the Timeout class timeout value is in seconds but the underlying
-      # executor resolution is in microseconds so fractionnal second parameter down to microseconds is possible.
-      # see https://github.com/jruby/jruby/blob/9.2.7.0/core/src/main/java/org/jruby/ext/timeout/Timeout.java#L125
-      @timeout_seconds = @timeout_millis / 1000.0
+      @timeout = @timeout_millis > 0.0 ? RubyTimeout.new(@timeout_millis) : NoopTimeout.new
     end # def register
 
     def filter(event)
@@ -334,26 +341,24 @@
     end
 
     def match_against_groks(groks, field, input, event)
+      # Convert anything else to string (number, hash, etc)
       input = input.to_s
       matched = false
-      groks.each do |grok|
-        # Convert anything else to string (number, hash, etc)
-        matched = grok_till_timeout(grok, field, input)
-        if matched
-          grok.capture(matched) {|field, value| handle(field, value, event)}
-          break if @break_on_match
+
+      context = GrokContext.new
+      with_timeout_if(@timeout_grouped, context) do
+        groks.each do |grok|
+          context.update(grok, field, input)
+
+          matched = with_timeout_if(!@timeout_grouped, context) { grok.execute(input) }
+          if matched
+            grok.capture(matched) { |field, value| handle(field, value, event) }
+            break if @break_on_match
+          end
         end
       end
-      
-      matched
-    end
 
-    def grok_till_timeout(grok, field, value)
-      begin
-        @timeout_seconds > 0.0 ? Timeout.timeout(@timeout_seconds, TimeoutError) { grok.execute(value) } : grok.execute(value)
-      rescue TimeoutError
-        raise GrokTimeoutException.new(grok, field, value)
-      end
+      matched
     end
 
     def handle(field, value, event)
