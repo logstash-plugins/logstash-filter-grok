@@ -144,10 +144,6 @@
   # filter. This newly defined patterns in `pattern_definitions` will not be available outside of that particular `grok` filter.
   #
   class LogStash::Filters::Grok < LogStash::Filters::Base
-    require 'logstash/filters/grok/timeout_support'
-
-    include TimeoutSupport
-
     config_name "grok"
 
     # A hash of matches of field => value
@@ -289,7 +285,7 @@
       @match_counter = metric.counter(:matches)
       @failure_counter = metric.counter(:failures)
 
-      @timeout = @timeout_millis > 0.0 ? RubyTimeout.new(@timeout_millis) : NoopTimeout.new
+      @timeout = @timeout_millis > 0.0 ? RubyTimeout.new(@timeout_millis) : NoopTimeout::INSTANCE
       @matcher = ( @timeout_scope.eql?('event') ? EventTimeoutMatcher : PatternTimeoutMatcher ).new(self)
     end # def register
 
@@ -477,6 +473,54 @@
         else
           "Value too large to output (#{value.bytesize} bytes)! First 255 chars are: #{value[0..255]}"
         end
+      end
+    end
+
+    def with_timeout(context, &block)
+      @timeout.exec(&block)
+    rescue TimeoutError => error
+      handle_timeout(context, error)
+    end
+    public :with_timeout
+
+    def handle_timeout(context, error)
+      raise GrokTimeoutException.new(context.grok, context.field, context.input)
+    end
+
+    # @private
+    class GrokContext
+      attr_reader :grok, :field, :input
+
+      def initialize(field, input)
+        @field = field
+        @input = input
+      end
+
+      def set_grok(grok)
+        @grok = grok
+      end
+    end
+
+    # @private
+    class NoopTimeout
+      INSTANCE = new
+
+      def exec
+        yield
+      end
+    end
+
+    # @private
+    class RubyTimeout
+      def initialize(timeout_millis)
+        # divide by float to allow fractional seconds, the Timeout class timeout value is in seconds but the underlying
+        # executor resolution is in microseconds so fractional second parameter down to microseconds is possible.
+        # see https://github.com/jruby/jruby/blob/9.2.7.0/core/src/main/java/org/jruby/ext/timeout/Timeout.java#L125
+        @timeout_seconds = timeout_millis / 1000.0
+      end
+
+      def exec(&block)
+        Timeout.timeout(@timeout_seconds, TimeoutError, &block)
       end
     end
   end # class LogStash::Filters::Grok
