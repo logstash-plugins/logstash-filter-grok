@@ -195,6 +195,7 @@ This plugin supports the following configuration options plus the <<plugins-{typ
 | <<plugins-{type}s-{plugin}-tag_on_failure>> |<<array,array>>|No
 | <<plugins-{type}s-{plugin}-tag_on_timeout>> |<<string,string>>|No
 | <<plugins-{type}s-{plugin}-timeout_millis>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-timeout_scope>> |<<string,string>>|No
 |=======================================================================
 
 Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
@@ -356,6 +357,22 @@ This will never timeout early, but may take a little longer to timeout.
 Actual timeout is approximate based on a 250ms quantization.
 Set to 0 to disable timeouts
 
+[id="plugins-{type}s-{plugin}-timeout_scope"]
+===== `timeout_scope`
+
+  * Value type is <<string,string>>
+  * Default value is `"pattern"`
+  * Supported values are `"pattern"` and `"event"`
+
+When multiple patterns are provided to <<plugins-{type}s-{plugin}-match>>,
+the timeout has historically applied to _each_ pattern, incurring overhead
+for each and every pattern that is attempted; when the grok filter is
+configured with `timeout_scope => event`, the plugin instead enforces
+a single timeout across all attempted matches on the event, so it can
+achieve similar safeguard against runaway matchers with significantly
+less overhead.
+
+It's usually better to scope the timeout for the whole event.
 
 
 [id="plugins-{type}s-{plugin}-common-options"]

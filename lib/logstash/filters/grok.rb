@@ -215,11 +215,14 @@
     # Set to 0 to disable timeouts
     config :timeout_millis, :validate => :number, :default => 30000
 
-    # Timeouts are per pattern matched by default but for multiple matches over a
-    # particular field it's usually better to scope the timeout for the whole event.
-    # The `timeout_millis` than effectively becomes a timeout over several matches.
-    # Default is false due backwards compatibility.
-    # Has only an effect when timeout_millis > 0
+    # When multiple patterns are provided to `match`,
+    # the timeout has historically applied to _each_ pattern, incurring overhead
+    # for each and every pattern that is attempted; when the grok filter is
+    # configured with `timeout_scope => 'event'`, the plugin instead enforces
+    # a single timeout across all attempted matches on the event, so it can
+    # achieve similar safeguard against runaway matchers with significantly
+    # less overhead.
+    # It's usually better to scope the timeout for the whole event.
     config :timeout_scope, :validate => %w(pattern event), :default => "pattern"
 
     # Tag to apply if a grok regexp times out.
