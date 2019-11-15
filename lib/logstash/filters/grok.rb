@@ -219,11 +219,12 @@
     # Set to 0 to disable timeouts
     config :timeout_millis, :validate => :number, :default => 30000
 
-    # Group timeout for multiple patterns instead of having a timeout per pattern.
-    # When set to true timeout_millis effectively becomes a timeout over several patterns.
+    # Timeouts are per pattern matched by default but for multiple matches over a
+    # particular field it's usually better to scope the timeout for the whole event.
+    # The `timeout_millis` than effectively becomes a timeout over several matches.
     # Default is false due backwards compatibility.
     # Has only an effect when timeout_millis > 0
-    config :timeout_grouped, :validate => :boolean, :default => false
+    config :timeout_scope, :validate => %w(pattern event), :default => "pattern"
 
     # Tag to apply if a grok regexp times out.
     config :tag_on_timeout, :validate => :string, :default => '_groktimeout'
@@ -289,7 +290,7 @@
       @failure_counter = metric.counter(:failures)
 
       @timeout = @timeout_millis > 0.0 ? RubyTimeout.new(@timeout_millis) : NoopTimeout.new
-      @matcher = @timeout_grouped ? GlobalMatcher.new(self) : DefaultMatcher.new(self)
+      @matcher = ( @timeout_scope.eql?('event') ? EventTimeoutMatcher : PatternTimeoutMatcher ).new(self)
     end # def register
 
     def filter(event)
@@ -380,7 +381,7 @@
     end
 
     # @private
-    class GlobalMatcher < Matcher
+    class EventTimeoutMatcher < Matcher
       # @override
       def match(context, groks, event, break_on_match)
         @filter.with_timeout(context) { super }
@@ -388,7 +389,7 @@
     end
 
     # @private
-    class DefaultMatcher < Matcher
+    class PatternTimeoutMatcher < Matcher
       # @override
       def execute(context, grok)
         @filter.with_timeout(context) { super }
