@@ -437,7 +437,7 @@ describe LogStash::Filters::Grok do
             ]
           }
           timeout_millis => 500
-          timeout_grouped => false
+          timeout_scope => 'pattern'
         }
       }
     CONFIG
@@ -459,7 +459,7 @@ describe LogStash::Filters::Grok do
             ]
           }
           timeout_millis => 500
-          timeout_grouped => true
+          timeout_scope => 'event'
         }
       }
     CONFIG
