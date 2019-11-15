@@ -1,3 +1,6 @@
+## 4.1.2
+ -  Added: support for timeout_scope [#153](https://github.com/logstash-plugins/logstash-filter-grok/pull/153)
+
 ## 4.1.1
  - Fix formatting for code sample [#148](https://github.com/logstash-plugins/logstash-filter-grok/pull/148)
 
