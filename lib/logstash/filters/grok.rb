@@ -289,6 +289,7 @@
       @failure_counter = metric.counter(:failures)
 
       @timeout = @timeout_millis > 0.0 ? RubyTimeout.new(@timeout_millis) : NoopTimeout.new
+      @matcher = @timeout_grouped ? GlobalMatcher.new(self) : DefaultMatcher.new(self)
     end # def register
 
     def filter(event)
@@ -342,23 +343,56 @@
 
     def match_against_groks(groks, field, input, event)
       # Convert anything else to string (number, hash, etc)
-      input = input.to_s
-      matched = false
+      context = GrokContext.new(field, input.to_s)
+      @matcher.match(context, groks, event, @break_on_match)
+    end
 
-      context = GrokContext.new
-      with_timeout_if(@timeout_grouped, context) do
-        groks.each do |grok|
-          context.update(grok, field, input)
+    # Internal (base) helper to handle the global timeout switch.
+    # @private
+    class Matcher
 
-          matched = with_timeout_if(!@timeout_grouped, context) { grok.execute(input) }
-          if matched
-            grok.capture(matched) { |field, value| handle(field, value, event) }
-            break if @break_on_match
-          end
-        end
+      def initialize(filter)
+        @filter = filter
       end
 
-      matched
+      def match(context, groks, event, break_on_match)
+        matched = false
+
+        groks.each do |grok|
+          context.set_grok(grok)
+
+          matched = execute(context, grok)
+          if matched
+            grok.capture(matched) { |field, value| @filter.handle(field, value, event) }
+            break if break_on_match
+          end
+        end
+
+        matched
+      end
+
+      protected
+
+      def execute(context, grok)
+        grok.execute(context.input)
+      end
+
+    end
+
+    # @private
+    class GlobalMatcher < Matcher
+      # @override
+      def match(context, groks, event, break_on_match)
+        @filter.with_timeout(context) { super }
+      end
+    end
+
+    # @private
+    class DefaultMatcher < Matcher
+      # @override
+      def execute(context, grok)
+        @filter.with_timeout(context) { super }
+      end
     end
 
     def handle(field, value, event)
@@ -383,6 +417,7 @@
         end
       end
     end
+    public :handle
 
     def patterns_files_from_paths(paths, glob)
       patternfiles = []

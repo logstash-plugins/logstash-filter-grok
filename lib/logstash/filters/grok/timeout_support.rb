@@ -25,12 +25,17 @@ module LogStash module Filters class Grok
       raise GrokTimeoutException.new(context.grok, context.field, context.input)
     end
 
-    GrokContext = Struct.new(:grok, :field, :input) do
+    class GrokContext
 
-      def update(grok, field, input)
-        self.grok = grok
-        self.field = field
-        self.input = input
+      attr_reader :grok, :field, :input
+
+      def initialize(field = nil, input = nil)
+        @field = field
+        @input = input
+      end
+
+      def set_grok(grok)
+        @grok = grok
       end
 
     end
