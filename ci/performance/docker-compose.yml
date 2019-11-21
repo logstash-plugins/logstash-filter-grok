@@ -1,18 +1,18 @@
 version: '3'
 
-# run tests:  cd ci/unit; docker-compose up --build --force-recreate
-# manual:  cd ci/unit; docker-compose run logstash bash
+# run tests:  cd ci/performance; docker-compose up --build --force-recreate
+# manual:  cd ci/performance; docker-compose run logstash bash
 services:
 
   logstash:
     build:
       context: ../../
-      dockerfile: ci/unit/Dockerfile
+      dockerfile: ci/performance/Dockerfile
       args:
         - ELASTIC_STACK_VERSION=$ELASTIC_STACK_VERSION
         - DISTRIBUTION=${DISTRIBUTION:-default}
-        #- INTEGRATION=false
-    command: ci/unit/run.sh
+        - INTEGRATION=false
+    command: ci/performance/run.sh
     env_file: docker.env
     environment:
       - SPEC_OPTS

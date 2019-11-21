@@ -8,9 +8,22 @@ matrix:
   - env: ELASTIC_STACK_VERSION=7.x
   - env: ELASTIC_STACK_VERSION=7.x SNAPSHOT=true
   - env: ELASTIC_STACK_VERSION=8.x SNAPSHOT=true
+  - env: ELASTIC_STACK_VERSION=6.7.1
+    install: ci/performance/docker-setup.sh
+    script: ci/performance/docker-run.sh
+    name: Performance Base-Line
+  - env: ELASTIC_STACK_VERSION=7.x
+    install: ci/performance/docker-setup.sh
+    script: ci/performance/docker-run.sh
+    name: Performance Test ELASTIC_STACK_VERSION=7.x
+  - env: ELASTIC_STACK_VERSION=8.x SNAPSHOT=true
+    install: ci/performance/docker-setup.sh
+    script: ci/performance/docker-run.sh
+    name: Performance Test ELASTIC_STACK_VERSION=8.x SNAPSHOT=true
   fast_finish: true
-#allow_failures:
-#  - env: ELASTIC_STACK_VERSION=8.x SNAPSHOT=true
-#  - env: ELASTIC_STACK_VERSION=7.x SNAPSHOT=true
+allow_failures:
+  - name: Performance Test ELASTIC_STACK_VERSION=8.x SNAPSHOT=true # till a release
+# Travis provides JRUBY_OPTS - use our own defaults (e.g. from ci/unit/docker.env)
+before_install: unset JRUBY_OPTS
 install: ci/unit/docker-setup.sh
 script: ci/unit/docker-run.sh
