@@ -9,3 +9,9 @@ if Dir.exist?(logstash_path) && use_logstash_source
   gem 'logstash-core', :path => "#{logstash_path}/logstash-core"
   gem 'logstash-core-plugin-api', :path => "#{logstash_path}/logstash-core-plugin-api"
 end
+
+group :test do
+  gem 'rspec-benchmark', :require => false if RUBY_VERSION >= '2.3'
+  gem 'logstash-input-generator', :require => false
+  gem 'logstash-output-null', :require => false
+end

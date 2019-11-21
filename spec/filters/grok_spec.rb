@@ -1,22 +1,5 @@
 # encoding: utf-8
-require "logstash/devutils/rspec/spec_helper"
-require "stud/temporary"
-
-module LogStash::Environment
-  # running the grok code outside a logstash package means
-  # LOGSTASH_HOME will not be defined, so let's set it here
-  # before requiring the grok filter
-  unless self.const_defined?(:LOGSTASH_HOME)
-    LOGSTASH_HOME = File.expand_path("../../../", __FILE__)
-  end
-
-  # also :pattern_path method must exist so we define it too
-  unless self.method_defined?(:pattern_path)
-    def pattern_path(path)
-      ::File.join(LOGSTASH_HOME, "patterns", path)
-    end
-  end
-end
+require_relative "../spec_helper"
 
 require "logstash/filters/grok"
 
@@ -514,38 +497,6 @@ describe LogStash::Filters::Grok do
 
     sample "hello world" do
       insist { subject.get("foo-bar") } == "hello"
-    end
-  end
-
-  describe "performance test", :performance => true do
-    event_count = 100000
-    min_rate = 2000
-
-    max_duration = event_count / min_rate
-    input = "Nov 24 01:29:01 -0800"
-    config <<-CONFIG
-      input {
-        generator {
-          count => #{event_count}
-          message => "Mar 16 00:01:25 evita postfix/smtpd[1713]: connect from camomile.cloud9.net[168.100.1.3]"
-        }
-      }
-      filter {
-        grok {
-          match => { "message" => "%{SYSLOGLINE}" }
-          overwrite => [ "message" ]
-        }
-      }
-      output { null { } }
-    CONFIG
-
-    2.times do
-      start = Time.now
-      agent do
-        duration = (Time.now - start)
-        puts "filters/grok parse rate: #{"%02.0f/sec" % (event_count / duration)}, elapsed: #{duration}s"
-        insist { duration } < max_duration
-      end
     end
   end
 
