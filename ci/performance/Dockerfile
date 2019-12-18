@@ -1,1 +1,1 @@
-../Dockerfile
+../../.ci/Dockerfile

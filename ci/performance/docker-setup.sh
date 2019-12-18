@@ -1,1 +1,1 @@
-../docker-setup.sh
+../../.ci/docker-setup.sh
