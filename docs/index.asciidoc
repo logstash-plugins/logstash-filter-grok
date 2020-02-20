@@ -345,6 +345,14 @@ successful match
 
 Tag to apply if a grok regexp times out.
 
+[id="plugins-{type}s-{plugin}-target"]
+===== `target`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting
+
+Define target namespace for placing matches.
+
 [id="plugins-{type}s-{plugin}-timeout_millis"]
 ===== `timeout_millis` 
 

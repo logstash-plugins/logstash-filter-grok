@@ -1,3 +1,6 @@
+## 4.3.0
+ -  Added: added target support [#156](https://github.com/logstash-plugins/logstash-filter-grok/pull/156)
+
 ## 4.2.0
  -  Added: support for timeout_scope [#153](https://github.com/logstash-plugins/logstash-filter-grok/pull/153)
 
