@@ -204,6 +204,10 @@
     # If `true`, keep empty captures as event fields.
     config :keep_empty_captures, :validate => :boolean, :default => false
 
+    # Define the target field for placing the matched captures.
+    # If this setting is omitted, data gets stored at the root (top level) of the event.
+    config :target, :validate => :string
+
     # Append values to the `tags` field when there has been no
     # successful match
     config :tag_on_failure, :validate => :array, :default => ["_grokparsefailure"]
@@ -287,6 +291,8 @@
       end # @match.each
       @match_counter = metric.counter(:matches)
       @failure_counter = metric.counter(:failures)
+
+      @target = "[#{@target.strip}]" if @target && @target !~ /\[.*?\]/
 
       @timeout = @timeout_millis > 0.0 ? RubyTimeout.new(@timeout_millis) : NoopTimeout::INSTANCE
       @matcher = ( @timeout_scope.eql?('event') ? EventTimeoutMatcher : PatternTimeoutMatcher ).new(self)
@@ -398,22 +404,26 @@
     def handle(field, value, event)
       return if (value.nil? || (value.is_a?(String) && value.empty?)) unless @keep_empty_captures
 
+      target_field = @target ? "#{@target}[#{field}]" : field
+
       if @overwrite.include?(field)
-        event.set(field, value)
+        event.set(target_field, value)
       else
-        v = event.get(field)
+        v = event.get(target_field)
         if v.nil?
-          event.set(field, value)
+          event.set(target_field, value)
         elsif v.is_a?(Array)
           # do not replace the code below with:
           #   event[field] << value
           # this assumes implementation specific feature of returning a mutable object
           # from a field ref which should not be assumed and will change in the future.
           v << value
-          event.set(field, v)
+          event.set(target_field, v)
         elsif v.is_a?(String)
           # Promote to array since we aren't overwriting.
-          event.set(field, [v, value])
+          event.set(target_field, [v, value])
+        else
+          @logger.debug("Not adding matched value - found existing (#{v.class})", :field => target_field, :value => value)
         end
       end
     end

@@ -37,6 +37,31 @@ describe LogStash::Filters::Grok do
       expect( event.get("program") ).to eql "postfix/smtpd"
       expect( event.get("pid") ).to eql "1713"
     end
+
+    context 'with target' do
+      let(:config) { { "match" => { "message" => "%{SYSLOGLINE}" }, "target" => "grok" } }
+
+      it "matches pattern" do
+        expect( event.get("message") ).to eql message
+        expect( event.get("tags") ).to be nil
+        expect( event.get("grok") ).to_not be nil
+        expect( event.get("[grok][timestamp]") ).to eql "Mar 16 00:01:25"
+        expect( event.get("[grok][message]") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+        expect( event.get("[grok][pid]") ).to eql "1713"
+      end
+    end
+
+    context 'with [deep] target' do
+      let(:config) { { "match" => { "message" => "%{SYSLOGLINE}" }, "target" => "[@metadata][grok]" } }
+
+      it "matches pattern" do
+        expect( event.get("message") ).to eql message
+        expect( event.get("tags") ).to be nil
+        expect( event.get("grok") ).to be nil
+        expect( event.get("[@metadata][grok][logsource]") ).to eql "evita"
+        expect( event.get("[@metadata][grok][message]") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+      end
+    end
   end
 
   describe "ietf 5424 syslog line" do
