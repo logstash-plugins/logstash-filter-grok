@@ -774,7 +774,7 @@ describe LogStash::Filters::Grok do
       end
 
       sample("message" => 'hello') do
-        insist { subject.get("tags") } == ["_grokparsefailure"]
+        expect(subject.get("tags")).to eql ["_grokparsefailure"]
       end
 
       after do
@@ -804,7 +804,7 @@ describe LogStash::Filters::Grok do
       end
 
       sample("message" => '0') do
-        insist { subject.get("tags") } == nil
+        expect(subject.get("tags")).to be nil
       end
 
       after do
@@ -833,7 +833,7 @@ describe LogStash::Filters::Grok do
       end
 
       sample("message" => '0') do
-        insist { subject.get("tags") } == nil
+        expect(subject.get("tags")).to be nil
       end
 
       after do
@@ -859,7 +859,7 @@ describe LogStash::Filters::Grok do
       end
 
       sample("message" => '0') do
-        insist { subject.get("tags") } == nil
+        expect(subject.get("tags")).to be nil
       end
 
       after do
@@ -879,16 +879,16 @@ describe LogStash::Filters::Grok do
       CONFIG
 
       sample "treebranch" do
-        insist { subject.get("name2") } == "branch"
+        expect(subject.get("name2")).to eql "branch"
       end
 
       sample "bushbeard" do
-        insist { subject.get("name1") } == "bush"
+        expect(subject.get("name1")).to eql "bush"
       end
 
       sample "treebeard" do
-        insist { subject.get("name1") } == "tree"
-        insist { subject.get("name2") } == "beard"
+        expect(subject.get("name1")).to eql "tree"
+        expect(subject.get("name2")).to eql "beard"
       end
     end
   end
