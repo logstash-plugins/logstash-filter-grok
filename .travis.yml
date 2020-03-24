@@ -1,14 +1,9 @@
 import:
 - logstash-plugins/.ci:travis/defaults.yml@1.x
 - logstash-plugins/.ci:travis/exec.yml@1.x
-env:
-  - SNAPSHOT=true ELASTIC_STACK_VERSION=8.0.0-SNAPSHOT
-  - SNAPSHOT=true ELASTIC_STACK_VERSION=7.7.0-SNAPSHOT
-  - ELASTIC_STACK_VERSION=7.6.1
-  - ELASTIC_STACK_VERSION=6.8.7
-jobs:
-  include:
-  - stage: performance
-    install: .ci/performance/docker-setup.sh
-    script: .ci/performance/docker-run.sh
-    name: Performance Base-Line
+- logstash-plugins/.ci:travis/matrix.yml@1.x
+stages:
+- name: performance
+  install: .ci/performance/docker-setup.sh
+  script: .ci/performance/docker-run.sh
+  name: Performance Base-Line
