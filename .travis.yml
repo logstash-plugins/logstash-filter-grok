@@ -1,29 +1,7 @@
----
-sudo: required
-language: minimal
-matrix:
+import:
+- logstash-plugins/.ci:travis/travis.yml@1.x
+jobs:
   include:
-  - env: ELASTIC_STACK_VERSION=5.x
-  - env: ELASTIC_STACK_VERSION=6.x
-  - env: ELASTIC_STACK_VERSION=7.x
-  - env: ELASTIC_STACK_VERSION=7.x SNAPSHOT=true
-  - env: ELASTIC_STACK_VERSION=8.x SNAPSHOT=true
-  - env: ELASTIC_STACK_VERSION=6.7.1
-    install: ci/performance/docker-setup.sh
-    script: ci/performance/docker-run.sh
+  - install: .ci/performance/docker-setup.sh
+    script: .ci/performance/docker-run.sh
     name: Performance Base-Line
-  - env: ELASTIC_STACK_VERSION=7.x
-    install: ci/performance/docker-setup.sh
-    script: ci/performance/docker-run.sh
-    name: Performance Test ELASTIC_STACK_VERSION=7.x
-  - env: ELASTIC_STACK_VERSION=8.x SNAPSHOT=true
-    install: ci/performance/docker-setup.sh
-    script: ci/performance/docker-run.sh
-    name: Performance Test ELASTIC_STACK_VERSION=8.x SNAPSHOT=true
-  fast_finish: true
-allow_failures:
-  - name: Performance Test ELASTIC_STACK_VERSION=8.x SNAPSHOT=true # till a release
-# Travis provides JRUBY_OPTS - use our own defaults (e.g. from ci/unit/docker.env)
-before_install: unset JRUBY_OPTS
-install: ci/unit/docker-setup.sh
-script: ci/unit/docker-run.sh
