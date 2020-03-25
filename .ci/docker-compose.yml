@@ -5,7 +5,7 @@ version: '3'
 services:
 
   logstash:
-    image: logstash_test:$ELASTIC_STACK_VERSION
+    image: ci_logstash:$ELASTIC_STACK_VERSION
     build:
       context: ../
       dockerfile: .ci/Dockerfile
