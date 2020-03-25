@@ -39,6 +39,6 @@ env:
     - ELASTIC_STACK_VERSION=6.8.7
 
 before_install:
-  - echo "hey"
+  - mkdir -p .ci && curl -sL https://github.com/logstash-plugins/.ci/archive/1.x.tar.gz | tar zxvf - --skip-old-files --strip-components=1 -C .ci --wildcards "*Dockerfile*" "*docker*" "*.sh"
 install: .ci/docker-setup.sh
 script: .ci/docker-run.sh
