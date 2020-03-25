@@ -1,9 +1,44 @@
-import:
-- logstash-plugins/.ci:travis/defaults.yml@1.x
-- logstash-plugins/.ci:travis/exec.yml@1.x
-- logstash-plugins/.ci:travis/matrix.yml@1.x
-stages:
-- name: performance
+_performance: &_performance
   install: .ci/performance/docker-setup.sh
   script: .ci/performance/docker-run.sh
+
+os: linux
+language: ruby
+services: docker
+addons:
+  apt:
+    packages:
+    - docker-ce
+
+stages:
+- name: test
+- name: performance
+  if: env(HAS_PERFORMANCE_TESTS) == "1"
+jobs:
+- stage: performance
   name: Performance Base-Line
+  <<: *_performance
+  env:
+  - ELASTIC_STACK_VERSION=6.8.8
+- name: Performance 8.0
+  <<: *_performance
+  env:
+  - SNAPSHOT=true ELASTIC_STACK_VERSION=8.0.0-SNAPSHOT
+- name: Performance 7.6
+  <<: *_performance
+  env:
+  - ELASTIC_STACK_VERSION=7.6.1
+
+env:
+  global:
+    - HAS_PERFORMANCE_TESTS=1
+  jobs:
+    - SNAPSHOT=true ELASTIC_STACK_VERSION=8.0.0-SNAPSHOT
+    - SNAPSHOT=true ELASTIC_STACK_VERSION=7.7.0-SNAPSHOT
+    - ELASTIC_STACK_VERSION=7.6.1
+    - ELASTIC_STACK_VERSION=6.8.7
+
+before_install:
+  - echo "hey"
+install: .ci/docker-setup.sh
+script: .ci/docker-run.sh
