@@ -13,13 +13,20 @@ jobs:
 - stage: performance
   name: Performance Base-Line
   <<: *_performance
-  env:
-  - ELASTIC_STACK_VERSION=6.8.8
+  env: ELASTIC_STACK_VERSION=6.8.7
 - name: Performance 8.0
   <<: *_performance
-  env:
-  - SNAPSHOT=true ELASTIC_STACK_VERSION=8.0.0-SNAPSHOT
+  env: SNAPSHOT=true ELASTIC_STACK_VERSION=8.0.0-SNAPSHOT
 - name: Performance 7.6
   <<: *_performance
-  env:
-  - ELASTIC_STACK_VERSION=7.6.1
+  env: ELASTIC_STACK_VERSION=7.6.1
+
+cache:
+  directories:
+  - docker_images
+
+before_install:
+- docker load -i docker_images/images.tar || true
+
+before_cache:
+- docker save -o docker_images/images.tar ci_logstash:latest
