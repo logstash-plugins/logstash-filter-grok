@@ -1,0 +1,21 @@
+version: '3'
+
+# run tests:  cd ci/unit; docker-compose up --build --force-recreate
+# manual:  cd ci/unit; docker-compose run logstash bash
+services:
+
+  logstash:
+    image: logstash_test:$ELASTIC_STACK_VERSION
+    build:
+      context: ../
+      dockerfile: .ci/Dockerfile
+      args:
+        - ELASTIC_STACK_VERSION=$ELASTIC_STACK_VERSION
+        - DISTRIBUTION=${DISTRIBUTION:-default}
+        #- INTEGRATION=false
+    command: .ci/run.sh
+    env_file: docker.env
+    environment:
+      - SPEC_OPTS
+      #- JRUBY_OPTS
+    tty: true
