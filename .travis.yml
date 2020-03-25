@@ -29,4 +29,4 @@ before_install:
 - .ci/before_install.sh
 
 before_cache:
-- docker save docker_images/image.tar ci_logstash
+- docker save docker_images/image-$ELASTIC_STACK_VERSION.tar ci_logstash
