@@ -2,4 +2,4 @@
 
 set -ex
 
-for tar docker_images/*.tar; do docker load -i $tar; done
+for tar in docker_images/*.tar; do docker load -i $tar; done
