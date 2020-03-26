@@ -2,4 +2,7 @@
 
 set -ex
 
-find docker_images -type f | xargs docker load -i
+for file in docker_images/*; do
+  [ -f "$fname" ] || continue
+  docker load -i $file
+done
