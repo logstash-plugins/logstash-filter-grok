@@ -2,4 +2,4 @@
 
 set -ex
 
-for tar in docker_images/*.tar; do docker load -i $tar; done
+find docker_images -type f | xargs docker load -i
