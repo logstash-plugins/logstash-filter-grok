@@ -1,7 +1,7 @@
 import:
 - logstash-plugins/.ci:travis/defaults.yml@1.x
 - logstash-plugins/.ci:travis/exec.yml@1.x
-- logstash-plugins/.ci:travis/matrix.yml@jsvd-patch-3
+- logstash-plugins/.ci:travis/matrix.yml@1.x
 
 env:
   global:
