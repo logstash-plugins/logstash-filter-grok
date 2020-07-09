@@ -3,8 +3,8 @@
   require "logstash/namespace"
   require "logstash/environment"
   require "logstash/patterns/core"
+  require 'logstash/plugin_mixins/ecs_compatibility_support'
   require "grok-pure" # rubygem 'jls-grok'
-  require "set"
   require "timeout"
 
   # Parse arbitrary text and structure it.
@@ -144,6 +144,8 @@
   # filter. This newly defined patterns in `pattern_definitions` will not be available outside of that particular `grok` filter.
   #
   class LogStash::Filters::Grok < LogStash::Filters::Base
+    include LogStash::PluginMixins::ECSCompatibilitySupport
+
     config_name "grok"
 
     # A hash of matches of field => value
@@ -250,22 +252,14 @@
     # will be parsed and `hello world` will overwrite the original message.
     config :overwrite, :validate => :array, :default => []
 
-    # Register default pattern paths
-    @@patterns_path ||= Set.new
-    @@patterns_path += [
-      LogStash::Patterns::Core.path,
-      LogStash::Environment.pattern_path("*")
-    ]
-
     def register
       # a cache of capture name handler methods.
       @handlers = {}
 
       @patternfiles = []
-
-      # Have @@patterns_path show first. Last-in pattern definitions win; this
-      # will let folks redefine built-in patterns at runtime.
-      @patternfiles += patterns_files_from_paths(@@patterns_path.to_a, "*")
+      # Have (default) patterns_path show first. Last-in pattern definitions wins
+      # this will let folks redefine built-in patterns at runtime
+      @patternfiles += patterns_files_from_paths(patterns_path, "*")
       @patternfiles += patterns_files_from_paths(@patterns_dir, @patterns_files_glob)
 
       @patterns = Hash.new { |h,k| h[k] = [] }
@@ -330,6 +324,24 @@
     end
 
     private
+
+    # The default pattern paths, depending on environment.
+    def patterns_path
+      patterns_path = []
+      case ecs_compatibility
+      when :disabled
+        patterns_path << LogStash::Patterns::Core.path # :legacy
+      when :v1
+        patterns_path << LogStash::Patterns::Core.path(:v1)
+      else
+        fail(NotImplementedError, "ECS #{ecs_compatibility} is not supported by this plugin.")
+      end
+      # allow plugin to be instantiated outside the LS environment (in tests)
+      if defined? LogStash::Environment.pattern_path
+        patterns_path << LogStash::Environment.pattern_path("*")
+      end
+      patterns_path
+    end
 
     def match(groks, field, event)
       input = event.get(field)
