@@ -87,10 +87,9 @@ describe LogStash::Filters::Grok do
       puts "filters/grok(timeout => 0) warmed up in #{wout_timeout_duration}"
       before_sample!
       no_timeout_durations = Array.new(SAMPLE_COUNT).map do
-        duration = do_sample_filter(filter_wout_timeout)
-        puts "filters/grok(timeout => 0) took #{duration}"
-        duration
+        do_sample_filter(filter_wout_timeout)
       end
+      puts "filters/grok(timeout => 0) took #{no_timeout_durations}"
 
       expected_duration = avg(no_timeout_durations)
       expected_duration += (expected_duration / 100) * ACCEPTED_TIMEOUT_DEGRADATION
@@ -102,11 +101,14 @@ describe LogStash::Filters::Grok do
 
       try(3) do
         before_sample!
-        expect do
-          duration = do_sample_filter(filter_with_timeout)
-          puts "filters/grok(timeout_scope => event) took #{duration}"
-          duration
-        end.to perform_under(expected_duration).sample(SAMPLE_COUNT).times
+        durations = []
+        begin
+          expect do
+            do_sample_filter(filter_with_timeout).tap { |duration| durations << duration }
+          end.to perform_under(expected_duration).sample(SAMPLE_COUNT).times
+        ensure
+          puts "filters/grok(timeout_scope => event) took #{durations}"
+        end
       end
     end
 
@@ -119,10 +121,6 @@ describe LogStash::Filters::Grok do
           filter.filter(LogStash::Event.new(sample_event))
         end
       end
-    end
-
-    def sample_event(hash)
-      LogStash::Event.new("message" => SAMPLE_MESSAGE)
     end
 
   end
