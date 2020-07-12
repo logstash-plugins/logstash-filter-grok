@@ -100,12 +100,14 @@ describe LogStash::Filters::Grok do
       with_timeout_duration = do_sample_filter(filter_with_timeout) # warmup
       puts "filters/grok(timeout_scope => event) warmed up in #{with_timeout_duration}"
 
-      before_sample!
-      expect do
-        duration = do_sample_filter(filter_with_timeout)
-        puts "filters/grok(timeout_scope => event) took #{duration}"
-        duration
-      end.to perform_under(expected_duration).sample(SAMPLE_COUNT).times
+      try(3) do
+        before_sample!
+        expect do
+          duration = do_sample_filter(filter_with_timeout)
+          puts "filters/grok(timeout_scope => event) took #{duration}"
+          duration
+        end.to perform_under(expected_duration).sample(SAMPLE_COUNT).times
+      end
     end
 
     @private
