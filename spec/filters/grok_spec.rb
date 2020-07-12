@@ -393,15 +393,17 @@ describe LogStash::Filters::Grok do
           "message" => [
             "(.*f){20}", "(.*e){20}", "(.*d){20}", "(.*c){20}", "(.*b){20}",
             "(.*a){25}", "(.*a){24}", "(.*a){23}", "(.*a){22}", "(.*a){21}",
+            "(.*a){25}", "(.*a){24}", "(.*a){23}", "(.*a){22}", "(.*a){21}",
+            "(.*a){25}", "(.*a){24}", "(.*a){23}", "(.*a){22}", "(.*a){21}",
             "(.*a){20}"
           ]
         },
-        'timeout_millis' => 500,
+        'timeout_millis' => 750,
         'timeout_scope' => 'pattern'
       }
     }
 
-    sample( 'b' * 10 + 'c' * 10 + 'd' * 10 + 'e' * 10 + ' ' + 'a' * 20 ) do
+    sample( 'b' * 15 + 'c' * 15 + 'd' * 15 + 'e' * 15 + ' ' + 'a' * 20 ) do
       expect( event.get("tags") ).to be nil
     end
   end
@@ -413,15 +415,17 @@ describe LogStash::Filters::Grok do
           "message" => [
             "(.*f){20}", "(.*e){20}", "(.*d){20}", "(.*c){20}", "(.*b){20}",
             "(.*a){25}", "(.*a){24}", "(.*a){23}", "(.*a){22}", "(.*a){21}",
+            "(.*a){25}", "(.*a){24}", "(.*a){23}", "(.*a){22}", "(.*a){21}",
+            "(.*a){25}", "(.*a){24}", "(.*a){23}", "(.*a){22}", "(.*a){21}",
             "(.*a){20}"
           ]
         },
-        'timeout_millis' => 500,
+        'timeout_millis' => 750,
         'timeout_scope' => 'event'
       }
     }
 
-    sample( 'b' * 10 + 'c' * 10 + 'd' * 10 + 'e' * 10 + ' ' + 'a' * 20 ) do
+    sample( 'b' * 15 + 'c' * 15 + 'd' * 15 + 'e' * 15 + ' ' + 'a' * 20 ) do
       expect( event.get("tags") ).to include("_groktimeout")
       expect( event.get("tags") ).not_to include("_grokparsefailure")
     end
