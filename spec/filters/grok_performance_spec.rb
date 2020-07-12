@@ -21,13 +21,7 @@ describe LogStash::Filters::Grok do
 
   describe "base-line performance", :performance => true do
 
-    EXPECTED_MIN_RATE = 15_000 # per second
-    # NOTE: based on Travis CI (docker) numbers :
-    # logstash_1_d010d1d29244 | LogStash::Filters::Grok
-    # logstash_1_d010d1d29244 |   base-line performance
-    # logstash_1_d010d1d29244 | filters/grok parse rate: 14464/sec, elapsed: 20.740866999999998s
-    # logstash_1_d010d1d29244 | filters/grok parse rate: 29957/sec, elapsed: 10.014199s
-    # logstash_1_d010d1d29244 | filters/grok parse rate: 32932/sec, elapsed: 9.109601999999999s
+    EXPECTED_MIN_RATE = 30_000 # per second - based on Travis CI (docker) numbers
 
     let(:config) do
       { 'match' => { "message" => "%{SYSLOGLINE}" }, 'overwrite' => [ "message" ] }
