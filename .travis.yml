@@ -6,3 +6,7 @@ import:
 env:
   global:
   - HAS_PERFORMANCE_TESTS=1
+
+allow_failures:
+  - name: Performance
+    if: type = cron
