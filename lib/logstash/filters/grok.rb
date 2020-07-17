@@ -332,7 +332,7 @@
       when :disabled
         patterns_path << LogStash::Patterns::Core.path # :legacy
       when :v1
-        patterns_path << LogStash::Patterns::Core.path(:v1)
+        patterns_path << LogStash::Patterns::Core.path('ecs-v1')
       else
         fail(NotImplementedError, "ECS #{ecs_compatibility} is not supported by this plugin.")
       end
