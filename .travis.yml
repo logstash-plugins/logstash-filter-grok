@@ -5,4 +5,5 @@ import:
 
 env:
   global:
-  - HAS_PERFORMANCE_TESTS=1
+  # disabled running performance tests on CI
+  - HAS_PERFORMANCE_TESTS=0

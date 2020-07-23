@@ -21,13 +21,7 @@ describe LogStash::Filters::Grok do
 
   describe "base-line performance", :performance => true do
 
-    EXPECTED_MIN_RATE = 15_000 # per second
-    # NOTE: based on Travis CI (docker) numbers :
-    # logstash_1_d010d1d29244 | LogStash::Filters::Grok
-    # logstash_1_d010d1d29244 |   base-line performance
-    # logstash_1_d010d1d29244 | filters/grok parse rate: 14464/sec, elapsed: 20.740866999999998s
-    # logstash_1_d010d1d29244 | filters/grok parse rate: 29957/sec, elapsed: 10.014199s
-    # logstash_1_d010d1d29244 | filters/grok parse rate: 32932/sec, elapsed: 9.109601999999999s
+    EXPECTED_MIN_RATE = 30_000 # per second - based on Travis CI (docker) numbers
 
     let(:config) do
       { 'match' => { "message" => "%{SYSLOGLINE}" }, 'overwrite' => [ "message" ] }
@@ -87,10 +81,9 @@ describe LogStash::Filters::Grok do
       puts "filters/grok(timeout => 0) warmed up in #{wout_timeout_duration}"
       before_sample!
       no_timeout_durations = Array.new(SAMPLE_COUNT).map do
-        duration = do_sample_filter(filter_wout_timeout)
-        puts "filters/grok(timeout => 0) took #{duration}"
-        duration
+        do_sample_filter(filter_wout_timeout)
       end
+      puts "filters/grok(timeout => 0) took #{no_timeout_durations}"
 
       expected_duration = avg(no_timeout_durations)
       expected_duration += (expected_duration / 100) * ACCEPTED_TIMEOUT_DEGRADATION
@@ -100,12 +93,17 @@ describe LogStash::Filters::Grok do
       with_timeout_duration = do_sample_filter(filter_with_timeout) # warmup
       puts "filters/grok(timeout_scope => event) warmed up in #{with_timeout_duration}"
 
-      before_sample!
-      expect do
-        duration = do_sample_filter(filter_with_timeout)
-        puts "filters/grok(timeout_scope => event) took #{duration}"
-        duration
-      end.to perform_under(expected_duration).sample(SAMPLE_COUNT).times
+      try(3) do
+        before_sample!
+        durations = []
+        begin
+          expect do
+            do_sample_filter(filter_with_timeout).tap { |duration| durations << duration }
+          end.to perform_under(expected_duration).sample(SAMPLE_COUNT).times
+        ensure
+          puts "filters/grok(timeout_scope => event) took #{durations}"
+        end
+      end
     end
 
     @private
@@ -117,10 +115,6 @@ describe LogStash::Filters::Grok do
           filter.filter(LogStash::Event.new(sample_event))
         end
       end
-    end
-
-    def sample_event(hash)
-      LogStash::Event.new("message" => SAMPLE_MESSAGE)
     end
 
   end
