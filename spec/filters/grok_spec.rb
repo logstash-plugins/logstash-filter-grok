@@ -38,6 +38,16 @@ describe LogStash::Filters::Grok do
       expect( event.get("pid") ).to eql "1713"
     end
 
+    context 'in ecs mode' do
+      let(:config) { super.merge('ecs_compatibility' => 'v1') }
+
+      it "matches pattern" do
+        expect( event.get("host") ).to eql "hostname"=>"evita"
+        expect( event.get("process") ).to eql "name"=>"postfix/smtpd", "pid"=>1713
+        expect( event.get("message") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+      end
+    end
+
     context 'with target' do
       let(:config) { { "match" => { "message" => "%{SYSLOGLINE}" }, "target" => "grok" } }
 
