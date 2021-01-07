@@ -272,11 +272,11 @@
         patterns = [patterns] if patterns.is_a?(String)
         @metric_match_fields.gauge(field, patterns.length)
 
-        @logger.trace("Grok compile", :field => field, :patterns => patterns)
+        @logger.trace? && @logger.trace("Grok compile", :field => field, :patterns => patterns)
         patterns.each do |pattern|
-          @logger.debug? and @logger.debug("regexp: #{@type}/#{field}", :pattern => pattern)
+          @logger.debug? && @logger.debug("regexp: #{@type}/#{field}", :pattern => pattern)
           grok = Grok.new
-          grok.logger = @logger unless @logger.nil?
+          grok.logger = @logger
           add_patterns_from_files(@patternfiles, grok)
           add_patterns_from_inline_definition(@pattern_definitions, grok)
           grok.compile(pattern, @named_captures_only)
@@ -295,15 +295,14 @@
     def filter(event)
       matched = false
 
-      @logger.debug? and @logger.debug("Running grok filter", :event => event)
+      @logger.debug? && @logger.debug("Running grok filter", :event => event.to_hash)
 
       @patterns.each do |field, groks|
         if match(groks, field, event)
           matched = true
           break if @break_on_match
         end
-        #break if done
-      end # @patterns.each
+      end
 
       if matched
         @match_counter.increment(1)
@@ -313,7 +312,7 @@
         @tag_on_failure.each {|tag| event.tag(tag)}
       end
 
-      @logger.debug? and @logger.debug("Event now: ", :event => event)
+      @logger.debug? && @logger.debug("Event now: ", :event => event.to_hash)
     rescue GrokTimeoutException => e
       @logger.warn(e.message)
       metric.increment(:timeouts)
@@ -355,7 +354,7 @@
         match_against_groks(groks, field, input, event)
       end
     rescue StandardError => e
-      @logger.warn("Grok regexp threw exception", :exception => e.message, :backtrace => e.backtrace, :class => e.class.name)
+      @logger.warn("Grok regexp threw exception", :message => e.message, :exception => e.class, :backtrace => e.backtrace)
       return false
     end
 
