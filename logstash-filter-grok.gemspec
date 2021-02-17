@@ -1,5 +1,4 @@
 Gem::Specification.new do |s|
-
   s.name            = 'logstash-filter-grok'
   s.version         = '4.4.0'
   s.licenses        = ['Apache License (2.0)']
@@ -26,7 +25,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'jls-grok', '~> 0.11.3'
   s.add_runtime_dependency 'stud', '~> 0.0.22'
-  s.add_runtime_dependency 'logstash-patterns-core', '>= 5.0.0', '< 6'
+  s.add_runtime_dependency 'logstash-patterns-core', '>= 4.3.0', '< 5'
 
   s.add_development_dependency 'logstash-devutils'
 end

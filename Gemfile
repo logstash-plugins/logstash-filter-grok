@@ -15,6 +15,3 @@ group :test do
   gem 'logstash-input-generator', :require => false
   gem 'logstash-output-null', :require => false
 end
-
-# TODO till 5.0.0 logstash-patterns-core release
-gem 'logstash-patterns-core', git: 'https://github.com/logstash-plugins/logstash-patterns-core.git', ref: 'ecs-wip'
