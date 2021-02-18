@@ -178,7 +178,7 @@ filter. This newly defined patterns in `pattern_definitions` will not be availab
 [id="plugins-{type}s-{plugin}-ecs"]
 ==== Migrating to Elastic Common Schema (ECS)
 
-To ease migration to the {ecs-ref}[Elastic Common Schema (ECS)], the filter
+To ease migration to the {ecs-ref}/index.html[Elastic Common Schema (ECS)], the filter
 plugin offers a new set of ECS-compliant patterns in addition to the existing
 patterns. The new ECS pattern definitions capture event field names that are
 compliant with the schema.
