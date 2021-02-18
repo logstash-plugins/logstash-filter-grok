@@ -3,8 +3,8 @@
   require "logstash/namespace"
   require "logstash/environment"
   require "logstash/patterns/core"
+  require 'logstash/plugin_mixins/ecs_compatibility_support'
   require "grok-pure" # rubygem 'jls-grok'
-  require "set"
   require "timeout"
 
   # Parse arbitrary text and structure it.
@@ -144,6 +144,8 @@
   # filter. This newly defined patterns in `pattern_definitions` will not be available outside of that particular `grok` filter.
   #
   class LogStash::Filters::Grok < LogStash::Filters::Base
+    include LogStash::PluginMixins::ECSCompatibilitySupport
+
     config_name "grok"
 
     # A hash of matches of field => value
@@ -250,22 +252,14 @@
     # will be parsed and `hello world` will overwrite the original message.
     config :overwrite, :validate => :array, :default => []
 
-    # Register default pattern paths
-    @@patterns_path ||= Set.new
-    @@patterns_path += [
-      LogStash::Patterns::Core.path,
-      LogStash::Environment.pattern_path("*")
-    ]
-
     def register
       # a cache of capture name handler methods.
       @handlers = {}
 
       @patternfiles = []
-
-      # Have @@patterns_path show first. Last-in pattern definitions win; this
-      # will let folks redefine built-in patterns at runtime.
-      @patternfiles += patterns_files_from_paths(@@patterns_path.to_a, "*")
+      # Have (default) patterns_path show first. Last-in pattern definitions wins
+      # this will let folks redefine built-in patterns at runtime
+      @patternfiles += patterns_files_from_paths(patterns_path, "*")
       @patternfiles += patterns_files_from_paths(@patterns_dir, @patterns_files_glob)
 
       @patterns = Hash.new { |h,k| h[k] = [] }
@@ -278,11 +272,11 @@
         patterns = [patterns] if patterns.is_a?(String)
         @metric_match_fields.gauge(field, patterns.length)
 
-        @logger.trace("Grok compile", :field => field, :patterns => patterns)
+        @logger.trace? && @logger.trace("Grok compile", :field => field, :patterns => patterns)
         patterns.each do |pattern|
-          @logger.debug? and @logger.debug("regexp: #{@type}/#{field}", :pattern => pattern)
+          @logger.debug? && @logger.debug("regexp: #{@type}/#{field}", :pattern => pattern)
           grok = Grok.new
-          grok.logger = @logger unless @logger.nil?
+          grok.logger = @logger
           add_patterns_from_files(@patternfiles, grok)
           add_patterns_from_inline_definition(@pattern_definitions, grok)
           grok.compile(pattern, @named_captures_only)
@@ -301,15 +295,14 @@
     def filter(event)
       matched = false
 
-      @logger.debug? and @logger.debug("Running grok filter", :event => event)
+      @logger.debug? && @logger.debug("Running grok filter", :event => event.to_hash)
 
       @patterns.each do |field, groks|
         if match(groks, field, event)
           matched = true
           break if @break_on_match
         end
-        #break if done
-      end # @patterns.each
+      end
 
       if matched
         @match_counter.increment(1)
@@ -319,7 +312,7 @@
         @tag_on_failure.each {|tag| event.tag(tag)}
       end
 
-      @logger.debug? and @logger.debug("Event now: ", :event => event)
+      @logger.debug? && @logger.debug("Event now: ", :event => event.to_hash)
     rescue GrokTimeoutException => e
       @logger.warn(e.message)
       metric.increment(:timeouts)
@@ -330,6 +323,24 @@
     end
 
     private
+
+    # The default pattern paths, depending on environment.
+    def patterns_path
+      patterns_path = []
+      case ecs_compatibility
+      when :disabled
+        patterns_path << LogStash::Patterns::Core.path # :legacy
+      when :v1
+        patterns_path << LogStash::Patterns::Core.path('ecs-v1')
+      else
+        fail(NotImplementedError, "ECS #{ecs_compatibility} is not supported by this plugin.")
+      end
+      # allow plugin to be instantiated outside the LS environment (in tests)
+      if defined? LogStash::Environment.pattern_path
+        patterns_path << LogStash::Environment.pattern_path("*")
+      end
+      patterns_path
+    end
 
     def match(groks, field, event)
       input = event.get(field)
@@ -343,7 +354,7 @@
         match_against_groks(groks, field, input, event)
       end
     rescue StandardError => e
-      @logger.warn("Grok regexp threw exception", :exception => e.message, :backtrace => e.backtrace, :class => e.class.name)
+      @logger.warn("Grok regexp threw exception", :message => e.message, :exception => e.class, :backtrace => e.backtrace)
       return false
     end
 

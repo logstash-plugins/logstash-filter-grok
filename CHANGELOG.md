@@ -1,8 +1,13 @@
+## 4.4.0
+ - Feat: ECS compatibility support [#162](https://github.com/logstash-plugins/logstash-filter-grok/pull/162)
+ 
+   The filter supports using (built-in) patterns definition that are fully Elactic Common Schema compliant.
+
 ## 4.3.0
- -  Added: added target support [#156](https://github.com/logstash-plugins/logstash-filter-grok/pull/156)
+ - Added: added target support [#156](https://github.com/logstash-plugins/logstash-filter-grok/pull/156)
 
 ## 4.2.0
- -  Added: support for timeout_scope [#153](https://github.com/logstash-plugins/logstash-filter-grok/pull/153)
+ - Added: support for timeout_scope [#153](https://github.com/logstash-plugins/logstash-filter-grok/pull/153)
 
 ## 4.1.1
  - Fix formatting for code sample [#148](https://github.com/logstash-plugins/logstash-filter-grok/pull/148)

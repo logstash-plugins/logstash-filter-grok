@@ -175,6 +175,21 @@ Another option is to define patterns _inline_ in the filter using `pattern_defin
 This is mostly for convenience and allows user to define a pattern which can be used just in that 
 filter. This newly defined patterns in `pattern_definitions` will not be available outside of that particular `grok` filter.
 
+[id="plugins-{type}s-{plugin}-ecs"]
+==== Migrating to Elastic Common Schema (ECS)
+
+To ease migration to the {ecs-ref}[Elastic Common Schema (ECS)], the filter
+plugin offers a new set of ECS-compliant patterns in addition to the existing
+patterns. The new ECS pattern definitions capture event field names that are
+compliant with the schema.
+
+The ECS pattern set has all of the pattern definitions from the legacy set, and is
+a drop-in replacement. Use the <<plugins-{type}s-{plugin}-ecs_compatibility>>
+setting to switch modes. 
+
+New features and enhancements will be added to the ECS-compliant files. The
+legacy patterns may still receive bug fixes which are backwards compatible.
+
 
 [id="plugins-{type}s-{plugin}-options"]
 ==== Grok Filter Configuration Options
@@ -185,6 +200,7 @@ This plugin supports the following configuration options plus the <<plugins-{typ
 |=======================================================================
 |Setting |Input type|Required
 | <<plugins-{type}s-{plugin}-break_on_match>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-ecs_compatibility>> |<<string,string>>|No
 | <<plugins-{type}s-{plugin}-keep_empty_captures>> |<<boolean,boolean>>|No
 | <<plugins-{type}s-{plugin}-match>> |<<hash,hash>>|No
 | <<plugins-{type}s-{plugin}-named_captures_only>> |<<boolean,boolean>>|No
@@ -212,6 +228,20 @@ filter plugins.
 Break on first match. The first successful match by grok will result in the
 filter being finished. If you want grok to try all patterns (maybe you are
 parsing different things), then set this to false.
+
+[id="plugins-{type}s-{plugin}-ecs_compatibility"]
+===== `ecs_compatibility`
+
+* Value type is <<string,string>>
+* Supported values are:
+** `disabled`: the plugin will load legacy (built-in) pattern definitions
+** `v1`: all patterns provided by the plugin will use ECS compliant captures
+* Default value depends on which version of Logstash is running:
+** When Logstash provides a `pipeline.ecs_compatibility` setting, its value is used as the default
+** Otherwise, the default value is `disabled`.
+
+Controls this plugin's compatibility with the {ecs-ref}[Elastic Common Schema (ECS)].
+The value of this setting affects extracted event field names when a composite pattern (such as `HTTPD_COMMONLOG`) is matched.
 
 [id="plugins-{type}s-{plugin}-keep_empty_captures"]
 ===== `keep_empty_captures` 
