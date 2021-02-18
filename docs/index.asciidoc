@@ -241,7 +241,7 @@ parsing different things), then set this to false.
 ** Otherwise, the default value is `disabled`.
 
 Controls this plugin's compatibility with the https://www.elastic.co/guide/en/ecs/current/index.html[Elastic Common Schema (ECS)].
-The value of this setting has an effect on extracted event field names when a composite pattern (e.g. `HTTPD_COMMONLOG`) is matched.
+The value of this setting affects extracted event field names when a composite pattern (such as `HTTPD_COMMONLOG`) is matched.
 
 [id="plugins-{type}s-{plugin}-keep_empty_captures"]
 ===== `keep_empty_captures` 
