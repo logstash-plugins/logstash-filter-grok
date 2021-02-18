@@ -176,7 +176,7 @@ This is mostly for convenience and allows user to define a pattern which can be 
 filter. This newly defined patterns in `pattern_definitions` will not be available outside of that particular `grok` filter.
 
 [id="plugins-{type}s-{plugin}-ecs"]
-==== Elastic Common Schema (ECS)
+==== Migrating to Elastic Common Schema (ECS)
 
 To ease migration to the {ecs-ref}[Elastic Common Schema (ECS)], the filter
 plugin offers a new set of ECS-compliant patterns in addition to the existing
