@@ -178,14 +178,18 @@ filter. This newly defined patterns in `pattern_definitions` will not be availab
 [id="plugins-{type}s-{plugin}-ecs"]
 ==== Elastic Common Schema (ECS)
 
-To ease migration to ECS the filter plugin is providing 2 sets of pattern files: the old 'legacy' set
-and another set of patterns with captures (event field names) that are compliant with the schema.
+To ease migration to the {ecs-ref}[Elastic Common Schema (ECS)], the filter
+plugin offers a new set of ECS-compliant patterns in addition to the existing
+patterns. The new ECS pattern definitions capture event field names that are
+compliant with the schema.
 
-The ECS set is a drop-in replacement - has all of the pattern definitions as the legacy files.
-New features and enhancements will be primarily added to ECS compliant files, the legacy patterns might
-still receive bug fixes which are backwards compatible.
+The ECS pattern set has all of the pattern definitions from the legacy set, and is
+a drop-in replacement. Use the <<plugins-{type}s-{plugin}-ecs_compatibility>>
+setting to switch modes. 
 
-To toggle between the two modes consult the <<plugins-{type}s-{plugin}-ecs_compatibility>> setting.
+New features and enhancements will be added to the ECS-compliant files. The
+legacy patterns may still receive bug fixes which are backwards compatible.
+
 
 [id="plugins-{type}s-{plugin}-options"]
 ==== Grok Filter Configuration Options
