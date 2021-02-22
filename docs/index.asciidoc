@@ -178,7 +178,7 @@ filter. This newly defined patterns in `pattern_definitions` will not be availab
 [id="plugins-{type}s-{plugin}-ecs"]
 ==== Migrating to Elastic Common Schema (ECS)
 
-To ease migration to the {ecs-ref}/index.html[Elastic Common Schema (ECS)], the filter
+To ease migration to the {ecs-ref}[Elastic Common Schema (ECS)], the filter
 plugin offers a new set of ECS-compliant patterns in addition to the existing
 patterns. The new ECS pattern definitions capture event field names that are
 compliant with the schema.
@@ -240,7 +240,7 @@ parsing different things), then set this to false.
 ** When Logstash provides a `pipeline.ecs_compatibility` setting, its value is used as the default
 ** Otherwise, the default value is `disabled`.
 
-Controls this plugin's compatibility with the {ecs-ref}/index.html[Elastic Common Schema (ECS)].
+Controls this plugin's compatibility with the {ecs-ref}[Elastic Common Schema (ECS)].
 The value of this setting affects extracted event field names when a composite pattern (such as `HTTPD_COMMONLOG`) is matched.
 
 [id="plugins-{type}s-{plugin}-keep_empty_captures"]

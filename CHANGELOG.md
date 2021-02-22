@@ -1,6 +1,3 @@
-## 4.4.1
- - [Doc] fix the broken link [#166](https://github.com/logstash-plugins/logstash-filter-grok/pull/166)
-
 ## 4.4.0
  - Feat: ECS compatibility support [#162](https://github.com/logstash-plugins/logstash-filter-grok/pull/162)
  
