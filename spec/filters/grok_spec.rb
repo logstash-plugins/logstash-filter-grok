@@ -39,7 +39,7 @@ describe LogStash::Filters::Grok do
     end
 
     context 'in ecs mode' do
-      let(:config) { super.merge('ecs_compatibility' => 'v1') }
+      let(:config) { super().merge('ecs_compatibility' => 'v1') }
 
       it "matches pattern" do
         expect( event.get("host") ).to eql "hostname"=>"evita"
