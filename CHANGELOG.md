@@ -1,7 +1,7 @@
 ## 4.4.0
  - Feat: ECS compatibility support [#162](https://github.com/logstash-plugins/logstash-filter-grok/pull/162)
  
-   The filter supports using (built-in) patterns definition that are fully Elactic Common Schema compliant.
+   The filter supports using built-in pattern definitions that are fully Elastic Common Schema (ECS) compliant.
 
 ## 4.3.0
  - Added: added target support [#156](https://github.com/logstash-plugins/logstash-filter-grok/pull/156)
