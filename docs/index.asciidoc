@@ -313,6 +313,17 @@ overwrite the `message` field with part of the match like so:
 In this case, a line like `May 29 16:37:11 sadness logger: hello world`
 will be parsed and `hello world` will overwrite the original message.
 
+If you are using a field reference in `overwrite`, you should use the field 
+reference also in the pattern(s). Example:
+[source,ruby]
+    filter {
+      grok {
+        match => { "somefield" => "%{DATA:[mymessage]}" }
+        overwrite => [ "[mymessage]" ]
+      }
+    }
+
+
 [id="plugins-{type}s-{plugin}-pattern_definitions"]
 ===== `pattern_definitions` 
 
