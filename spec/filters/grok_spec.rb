@@ -38,13 +38,15 @@ describe LogStash::Filters::Grok do
       expect( event.get("pid") ).to eql "1713"
     end
 
-    context 'in ecs mode' do
-      let(:config) { super().merge('ecs_compatibility' => 'v1') }
+    %w(v1 v8).each do |ecs_mode|
+      context "in ecs mode #{ecs_mode}" do
+        let(:config) { super().merge('ecs_compatibility' => ecs_mode) }
 
-      it "matches pattern" do
-        expect( event.get("host") ).to eql "hostname"=>"evita"
-        expect( event.get("process") ).to eql "name"=>"postfix/smtpd", "pid"=>1713
-        expect( event.get("message") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+        it "matches pattern" do
+          expect( event.get("host") ).to eql "hostname"=>"evita"
+          expect( event.get("process") ).to eql "name"=>"postfix/smtpd", "pid"=>1713
+          expect( event.get("message") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+        end
       end
     end
 
@@ -701,7 +703,8 @@ describe LogStash::Filters::Grok do
       expect( LogStash::Json.dump(event.get('username')) ).to eql "\"testuser\""
 
       expect( event.to_json ).to match %r|"src_ip":"1.1.1.1"|
-      expect( event.to_json ).to match %r|"@timestamp":"20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ"|
+      # expect( event.to_json ).to match %r|"@timestamp":"20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(\.(\d\d\d){1,3})?Z"|
+      expect( event.to_json ).to match %r|"@timestamp":"#{Regexp.escape(event.get('@timestamp').to_s)}"|
       expect( event.to_json ).to match %r|"port":"22"|
       expect( event.to_json ).to match %r|"@version":"1"|
       expect( event.to_json ).to match %r|"username"|i
@@ -764,6 +767,26 @@ describe LogStash::Filters::Grok do
             subject.filter(event)
           end
         end.to raise_exception(blocking_exception_class)
+      end
+    end
+  end
+end
+
+describe LogStash::Filters::Grok do
+
+  subject(:grok_filter) { described_class.new(config) }
+  let(:config) { {} }
+
+  context 'when initialized with `ecs_compatibility => v8`' do
+    let(:config) { super().merge("ecs_compatibility" => "v8", "match" => ["message", "%{SYSLOGLINE}"]) }
+    context '#register' do
+      let(:logger_stub) { double('Logger').as_null_object }
+      before(:each) { allow_any_instance_of(described_class).to receive(:logger).and_return(logger_stub)}
+
+      it 'logs a helpful warning about the unreleased v8' do
+        grok_filter.register
+
+        expect(logger_stub).to have_received(:warn).with(a_string_including "preview of the unreleased ECS v8")
       end
     end
   end
