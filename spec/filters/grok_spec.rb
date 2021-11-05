@@ -703,7 +703,6 @@ describe LogStash::Filters::Grok do
       expect( LogStash::Json.dump(event.get('username')) ).to eql "\"testuser\""
 
       expect( event.to_json ).to match %r|"src_ip":"1.1.1.1"|
-      # expect( event.to_json ).to match %r|"@timestamp":"20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(\.(\d\d\d){1,3})?Z"|
       expect( event.to_json ).to match %r|"@timestamp":"#{Regexp.escape(event.get('@timestamp').to_s)}"|
       expect( event.to_json ).to match %r|"port":"22"|
       expect( event.to_json ).to match %r|"@version":"1"|
