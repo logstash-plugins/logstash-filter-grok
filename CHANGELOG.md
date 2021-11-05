@@ -1,5 +1,5 @@
 ## 4.4.1
- - Added preview of ECS v8 support using existing ECS v1 implementation
+ - Added preview of ECS v8 support using existing ECS v1 implementation [#175](https://github.com/logstash-plugins/logstash-filter-grok/pull/175)
 
 ## 4.4.0
  - Feat: ECS compatibility support [#162](https://github.com/logstash-plugins/logstash-filter-grok/pull/162)
