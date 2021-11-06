@@ -235,7 +235,7 @@ parsing different things), then set this to false.
 * Value type is <<string,string>>
 * Supported values are:
 ** `disabled`: the plugin will load legacy (built-in) pattern definitions
-** `v1`: all patterns provided by the plugin will use ECS compliant captures
+** `v1`,`v8`: all patterns provided by the plugin will use ECS compliant captures
 * Default value depends on which version of Logstash is running:
 ** When Logstash provides a `pipeline.ecs_compatibility` setting, its value is used as the default
 ** Otherwise, the default value is `disabled`.
