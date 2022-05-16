@@ -1,3 +1,6 @@
+## 4.4.1
+  - Clarify the definition of matches that depend on previous captures [#169](https://api.github.com/repos/logstash-plugins/logstash-filter-grok/pulls/169)
+
 ## 4.4.0
  - Feat: ECS compatibility support [#162](https://github.com/logstash-plugins/logstash-filter-grok/pull/162)
  
