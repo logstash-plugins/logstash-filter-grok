@@ -1,5 +1,5 @@
 ## 4.4.2
-  - Clarify the definition of matches that depend on previous captures [#169](https://api.github.com/repos/logstash-plugins/logstash-filter-grok/pulls/169)
+  - Clarify the definition of matches that depend on previous captures [#169](https://github.com/logstash-plugins/logstash-filter-grok/pull/169)
 
 ## 4.4.1
  - Added preview of ECS v8 support using existing ECS v1 implementation [#175](https://github.com/logstash-plugins/logstash-filter-grok/pull/175)
