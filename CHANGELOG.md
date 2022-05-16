@@ -1,10 +1,13 @@
-## 4.4.1
+## 4.4.2
   - Clarify the definition of matches that depend on previous captures [#169](https://api.github.com/repos/logstash-plugins/logstash-filter-grok/pulls/169)
+
+## 4.4.1
+ - Added preview of ECS v8 support using existing ECS v1 implementation [#175](https://github.com/logstash-plugins/logstash-filter-grok/pull/175)
 
 ## 4.4.0
  - Feat: ECS compatibility support [#162](https://github.com/logstash-plugins/logstash-filter-grok/pull/162)
  
-   The filter supports using (built-in) patterns definition that are fully Elactic Common Schema compliant.
+   The filter supports using built-in pattern definitions that are fully Elastic Common Schema (ECS) compliant.
 
 ## 4.3.0
  - Added: added target support [#156](https://github.com/logstash-plugins/logstash-filter-grok/pull/156)
