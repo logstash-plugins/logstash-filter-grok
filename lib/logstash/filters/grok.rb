@@ -286,10 +286,12 @@
       @match_counter = metric.counter(:matches)
       @failure_counter = metric.counter(:failures)
 
-      @target = "[#{@target.strip}]" if @target && @target !~ /\[.*?\]/
+      @target = "[#{@target.strip}]" if @target && @target !~ /^\[.+\]$/
 
       @timeout = @timeout_millis > 0.0 ? RubyTimeout.new(@timeout_millis) : NoopTimeout::INSTANCE
       @matcher = ( @timeout_scope.eql?('event') ? EventTimeoutMatcher : PatternTimeoutMatcher ).new(self)
+
+      @overwrite = @overwrite.map { |field| field =~ /^\[.+\]$/ ? field : "[#{field}]" } if @overwrite
     end # def register
 
     def filter(event)
@@ -418,9 +420,10 @@
     def handle(field, value, event)
       return if (value.nil? || (value.is_a?(String) && value.empty?)) unless @keep_empty_captures
 
-      target_field = @target ? "#{@target}[#{field}]" : field
+      field = "[#{field}]" if field !~ /^\[.+\]$/
+      target_field = @target ? "#{@target}#{field}" : field
 
-      if @overwrite.include?(field)
+      if @overwrite.include?(field) || @overwrite.include?(target_field)
         event.set(target_field, value)
       else
         v = event.get(target_field)
