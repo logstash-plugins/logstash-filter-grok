@@ -210,6 +210,7 @@ This plugin supports the following configuration options plus the <<plugins-{typ
 | <<plugins-{type}s-{plugin}-patterns_files_glob>> |<<string,string>>|No
 | <<plugins-{type}s-{plugin}-tag_on_failure>> |<<array,array>>|No
 | <<plugins-{type}s-{plugin}-tag_on_timeout>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-target>> |<<string,string>>|No
 | <<plugins-{type}s-{plugin}-timeout_millis>> |<<number,number>>|No
 | <<plugins-{type}s-{plugin}-timeout_scope>> |<<string,string>>|No
 |=======================================================================
