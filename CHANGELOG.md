@@ -1,3 +1,6 @@
+## 4.4.3
+  - docs: Add target field to configuration options table [#182](https://github.com/logstash-plugins/logstash-filter-grok/pull/182)
+
 ## 4.4.2
   - Clarify the definition of matches that depend on previous captures [#169](https://github.com/logstash-plugins/logstash-filter-grok/pull/169)
 
