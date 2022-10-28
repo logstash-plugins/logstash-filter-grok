@@ -289,7 +289,7 @@ To perform matches on multiple fields just use multiple entries in the `match` h
       grok {
         match => {
           "speed" => "Speed: %{NUMBER:speed}"
-          "duration => "Duration: %{NUMBER:duration}"
+          "duration" => "Duration: %{NUMBER:duration}"
         }
       }
     }
@@ -306,7 +306,7 @@ However, if one pattern depends on a field created by a previous pattern, separa
       }
       grok {
         match => {
-          "rest => "a number %{NUMBER"number}, and a word %{WORD:word}"
+          "rest" => "a number %{NUMBER:number}, and a word %{WORD:word}"
         }
       }
     }

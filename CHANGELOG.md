@@ -1,3 +1,6 @@
+## 4.4.3
+  - Minor typos in docs examples [#176](https://github.com/logstash-plugins/logstash-filter-grok/pull/176)
+
 ## 4.4.2
   - Clarify the definition of matches that depend on previous captures [#169](https://github.com/logstash-plugins/logstash-filter-grok/pull/169)
 
