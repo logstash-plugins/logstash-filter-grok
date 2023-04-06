@@ -65,7 +65,11 @@ For example, `3.44` could be the duration of an event, so you could call it
 simply `duration`. Further, a string `55.3.244.1` might identify the `client`
 making a request.
 
-For the above example, your grok filter would look something like this:
+Take this example log entry:
+[source,ruby]
+3.44 55.3.244.1
+
+Your grok filter would look something like this:
 [source,ruby]
 %{NUMBER:duration} %{IP:client}
 
