@@ -29,14 +29,19 @@ describe LogStash::Filters::Grok do
     let(:config) { { "match" => { "message" => "%{SYSLOGLINE}" }, "overwrite" => [ "message" ] } }
     let(:message) { 'Mar 16 00:01:25 evita postfix/smtpd[1713]: connect from camomile.cloud9.net[168.100.1.3]' }
 
-    it "matches pattern" do
-      expect( event.get("tags") ).to be nil
-      expect( event.get("logsource") ).to eql "evita"
-      expect( event.get("timestamp") ).to eql "Mar 16 00:01:25"
-      expect( event.get("message") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
-      expect( event.get("program") ).to eql "postfix/smtpd"
-      expect( event.get("pid") ).to eql "1713"
+    context "in ecs mode disabled" do
+      let(:config) { super().merge('ecs_compatibility' => 'disabled') }
+
+      it "matches pattern" do
+        expect( event.get("tags") ).to be nil
+        expect( event.get("timestamp") ).to eql "Mar 16 00:01:25"
+        expect( event.get("logsource") ).to eql "evita"
+        expect( event.get("program") ).to eql "postfix/smtpd"
+        expect( event.get("pid") ).to eql "1713"
+        expect( event.get("message") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+      end
     end
+
 
     %w(v1 v8).each do |ecs_mode|
       context "in ecs mode #{ecs_mode}" do
@@ -59,7 +64,7 @@ describe LogStash::Filters::Grok do
         expect( event.get("grok") ).to_not be nil
         expect( event.get("[grok][timestamp]") ).to eql "Mar 16 00:01:25"
         expect( event.get("[grok][message]") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
-        expect( event.get("[grok][pid]") ).to eql "1713"
+        expect( event.get("[grok][process][pid]") ).to eql 1713
       end
     end
 
@@ -70,14 +75,15 @@ describe LogStash::Filters::Grok do
         expect( event.get("message") ).to eql message
         expect( event.get("tags") ).to be nil
         expect( event.get("grok") ).to be nil
-        expect( event.get("[@metadata][grok][logsource]") ).to eql "evita"
+        expect( event.get("[@metadata][grok][host][hostname]") ).to eql "evita"
         expect( event.get("[@metadata][grok][message]") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
       end
     end
   end
 
-  describe "ietf 5424 syslog line" do
-    let(:config) { { "match" => { "message" => "%{SYSLOG5424LINE}" } } }
+  %w(disabled).each do |ecs_mode|
+    describe "ietf 5424 syslog line" do
+    let(:config) { { 'ecs_compatibility' => ecs_mode, "match" => { "message" => "%{SYSLOG5424LINE}" } } }
 
     sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug 4123 - [id1 foo=\"bar\"][id2 baz=\"something\"] Hello, syslog." do
       expect( event.get("tags") ).to be nil
@@ -185,6 +191,116 @@ describe LogStash::Filters::Grok do
       expect( event.get("syslog5424_sd") ).to be nil
       expect( event.get("syslog5424_msg") ).to eql "Appname is nil"
     end
+    end
+  end
+  %w(v1 v8).each do |ecs_mode|
+    describe "ietf 5424 syslog line" do
+        let(:config) { { "overwrite" => [ "message" ], 'ecs_compatibility' => ecs_mode, "match" => { "message" => "%{SYSLOG5424LINE}" } } }
+
+        sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug 4123 - [id1 foo=\"bar\"][id2 baz=\"something\"] Hello, syslog." do
+          expect( event.get("tags") ).to be nil
+          expect( event.get("[log][syslog][priority]") ).to eql 191
+          expect( event.get("[system][syslog][version]") ).to eql "1"
+          expect( event.get("timestamp") ).to eql "2009-06-30T18:30:00+02:00"
+          expect( event.get("[host][hostname]") ).to eql "paxton.local"
+          expect( event.get("[process][name]") ).to eql "grokdebug"
+          expect( event.get("[process][pid]") ).to eql 4123
+          expect( event.get("[event][code]") ).to be nil
+          expect( event.get("[system][syslog][structured_data]") ).to eql "[id1 foo=\"bar\"][id2 baz=\"something\"]"
+          expect( event.get("message") ).to eql "Hello, syslog."
+        end
+
+        sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug - - [id1 foo=\"bar\"] No process ID." do
+          expect( event.get("tags") ).to be nil
+          expect( event.get("[log][syslog][priority]") ).to eql 191
+          expect( event.get("[system][syslog][version]") ).to eql "1"
+          expect( event.get("timestamp") ).to eql "2009-06-30T18:30:00+02:00"
+          expect( event.get("[host][hostname]") ).to eql "paxton.local"
+          expect( event.get("[process][name]") ).to eql "grokdebug"
+          expect( event.get("[process][pid]") ).to be nil
+          expect( event.get("[event][code]") ).to be nil
+          expect( event.get("[system][syslog][structured_data]") ).to eql "[id1 foo=\"bar\"]"
+          expect( event.get("message") ).to eql "No process ID."
+        end
+
+        sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug 4123 - - No structured data." do
+          expect( event.get("tags") ).to be nil
+          expect( event.get("[log][syslog][priority]") ).to eql 191
+          expect( event.get("[system][syslog][version]") ).to eql "1"
+          expect( event.get("timestamp") ).to eql "2009-06-30T18:30:00+02:00"
+          expect( event.get("[host][hostname]") ).to eql "paxton.local"
+          expect( event.get("[process][name]") ).to eql "grokdebug"
+          expect( event.get("[process][pid]") ).to be 4123
+          expect( event.get("[event][code]") ).to be nil
+          expect( event.get("[system][syslog][structured_data]") ).to be nil
+          expect( event.get("message") ).to eql "No structured data."
+        end
+
+        sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug - - - No PID or SD." do
+          expect( event.get("tags") ).to be nil
+          expect( event.get("[log][syslog][priority]") ).to eql 191
+          expect( event.get("[system][syslog][version]") ).to eql "1"
+          expect( event.get("timestamp") ).to eql "2009-06-30T18:30:00+02:00"
+          expect( event.get("[host][hostname]") ).to eql "paxton.local"
+          expect( event.get("[process][name]") ).to eql "grokdebug"
+          expect( event.get("[process][pid]") ).to be nil
+          expect( event.get("[event][code]") ).to be nil
+          expect( event.get("[system][syslog][structured_data]") ).to be nil
+          expect( event.get("message") ).to eql "No PID or SD."
+        end
+
+        sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug 4123 -  Missing structured data." do
+          expect( event.get("tags") ).to be nil
+          expect( event.get("[process][pid]") ).to eql 4123
+          expect( event.get("[event][code]") ).to be nil
+          expect( event.get("[system][syslog][structured_data]") ).to be nil
+          expect( event.get("message") ).to eql "Missing structured data."
+        end
+
+        sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug  4123 - - Additional spaces." do
+          expect( event.get("tags") ).to be nil
+          expect( event.get("[process][name]") ).to eql "grokdebug"
+          expect( event.get("[process][pid]") ).to be 4123
+          expect( event.get("[event][code]") ).to be nil
+          expect( event.get("[system][syslog][structured_data]") ).to be nil
+          expect( event.get("message") ).to eql "Additional spaces."
+        end
+
+        sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug  4123 -  Additional spaces and missing SD." do
+          expect( event.get("tags") ).to be nil
+          expect( event.get("[process][name]") ).to eql "grokdebug"
+          expect( event.get("[process][pid]") ).to be 4123
+          expect( event.get("[event][code]") ).to be nil
+          expect( event.get("[system][syslog][structured_data]") ).to be nil
+          expect( event.get("message") ).to eql "Additional spaces and missing SD."
+        end
+
+        sample "<30>1 2014-04-04T16:44:07+02:00 osctrl01 dnsmasq-dhcp 8048 - -  Appname contains a dash" do
+          expect( event.get("tags") ).to be nil
+          expect( event.get("[log][syslog][priority]") ).to eql 30
+          expect( event.get("[system][syslog][version]") ).to eql "1"
+          expect( event.get("timestamp") ).to eql "2014-04-04T16:44:07+02:00"
+          expect( event.get("[host][hostname]") ).to eql "osctrl01"
+          expect( event.get("[process][name]") ).to eql "dnsmasq-dhcp"
+          expect( event.get("[process][pid]") ).to be 8048
+          expect( event.get("[event][code]") ).to be nil
+          expect( event.get("[system][syslog][structured_data]") ).to be nil
+          expect( event.get("message") ).to eql "Appname contains a dash"
+        end
+
+        sample "<30>1 2014-04-04T16:44:07+02:00 osctrl01 - 8048 - -  Appname is nil" do
+          expect( event.get("tags") ).to be nil
+          expect( event.get("[log][syslog][priority]") ).to eql 30
+          expect( event.get("[system][syslog][version]") ).to eql "1"
+          expect( event.get("timestamp") ).to eql "2014-04-04T16:44:07+02:00"
+          expect( event.get("[host][hostname]") ).to eql "osctrl01"
+          expect( event.get("[process][name]") ).to eql nil
+          expect( event.get("[process][pid]") ).to be 8048
+          expect( event.get("[event][code]") ).to be nil
+          expect( event.get("[system][syslog][structured_data]") ).to be nil
+          expect( event.get("message") ).to eql  "Appname is nil"
+        end
+      end
   end
 
   describe "parsing an event with multiple messages (array of strings)", if: false do
@@ -729,6 +845,7 @@ describe LogStash::Filters::Grok do
       expect( event.get("hindsight") ).to eql "2020"
     end
   end
+
 
   describe  "grok with inline pattern definition overwrites existing pattern definition" do
     let(:config) {
