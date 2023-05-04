@@ -32,58 +32,90 @@ describe LogStash::Filters::Grok do
     context "in ecs mode disabled" do
       let(:config) { super().merge('ecs_compatibility' => 'disabled') }
 
-      it "matches pattern" do
-        expect( event.get("tags") ).to be nil
-        expect( event.get("timestamp") ).to eql "Mar 16 00:01:25"
-        expect( event.get("logsource") ).to eql "evita"
-        expect( event.get("program") ).to eql "postfix/smtpd"
-        expect( event.get("pid") ).to eql "1713"
-        expect( event.get("message") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+      context 'when overwriting message' do
+        let(:config) { super().merge("overwrite" => [ "message" ]) }
+
+        it "matches pattern" do
+          expect( event.get("tags") ).to be nil
+          expect( event.get("logsource") ).to eql "evita"
+          expect( event.get("timestamp") ).to eql "Mar 16 00:01:25"
+          expect( event.get("message") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+          expect( event.get("program") ).to eql "postfix/smtpd"
+          expect( event.get("pid") ).to eql "1713"
+        end
+      end
+
+      context 'with target' do
+        let(:config) { super().merge("target" => "grok") }
+
+        it "matches pattern" do
+          expect( event.get("message") ).to eql message
+          expect( event.get("tags") ).to be nil
+          expect( event.get("grok") ).to_not be nil
+          expect( event.get("[grok][timestamp]") ).to eql "Mar 16 00:01:25"
+          expect( event.get("[grok][message]") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+          expect( event.get("[grok][pid]") ).to eql "1713"
+        end
+      end
+
+      context 'with [deep] target' do
+        let(:config) { super().merge("target" => "[@metadata][grok]") }
+
+        it "matches pattern" do
+          expect( event.get("message") ).to eql message
+          expect( event.get("tags") ).to be nil
+          expect( event.get("grok") ).to be nil
+          expect( event.get("[@metadata][grok][logsource]") ).to eql "evita"
+          expect( event.get("[@metadata][grok][message]") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+        end
       end
     end
-
 
     %w(v1 v8).each do |ecs_mode|
       context "in ecs mode #{ecs_mode}" do
         let(:config) { super().merge('ecs_compatibility' => ecs_mode) }
 
-        it "matches pattern" do
-          expect( event.get("host") ).to eql "hostname"=>"evita"
-          expect( event.get("process") ).to eql "name"=>"postfix/smtpd", "pid"=>1713
-          expect( event.get("message") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+        context 'when overwriting message' do
+          let(:config) { super().merge("overwrite" => [ "message" ]) }
+
+          it "matches pattern" do
+            expect( event.get("host") ).to eql "hostname"=>"evita"
+            expect( event.get("process") ).to eql "name"=>"postfix/smtpd", "pid"=>1713
+            expect( event.get("message") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+          end
+        end
+
+        context 'with target' do
+          let(:config) { super().merge("target" => "grok") }
+
+          it "matches pattern" do
+            expect( event.get("message") ).to eql message
+            expect( event.get("tags") ).to be nil
+            expect( event.get("grok") ).to_not be nil
+            expect( event.get("[grok][timestamp]") ).to eql "Mar 16 00:01:25"
+            expect( event.get("[grok][message]") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+            expect( event.get("[grok][process][pid]") ).to eql 1713
+          end
+        end
+
+        context 'with [deep] target' do
+          let(:config) { super().merge("target" => "[@metadata][grok]") }
+
+          it "matches pattern" do
+            expect( event.get("message") ).to eql message
+            expect( event.get("tags") ).to be nil
+            expect( event.get("grok") ).to be nil
+            expect( event.get("[@metadata][grok][host][hostname]") ).to eql "evita"
+            expect( event.get("[@metadata][grok][message]") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
+          end
         end
       end
     end
 
-    context 'with target' do
-      let(:config) { { "match" => { "message" => "%{SYSLOGLINE}" }, "target" => "grok" } }
-
-      it "matches pattern" do
-        expect( event.get("message") ).to eql message
-        expect( event.get("tags") ).to be nil
-        expect( event.get("grok") ).to_not be nil
-        expect( event.get("[grok][timestamp]") ).to eql "Mar 16 00:01:25"
-        expect( event.get("[grok][message]") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
-        expect( event.get("[grok][process][pid]") ).to eql 1713
-      end
-    end
-
-    context 'with [deep] target' do
-      let(:config) { { "match" => { "message" => "%{SYSLOGLINE}" }, "target" => "[@metadata][grok]" } }
-
-      it "matches pattern" do
-        expect( event.get("message") ).to eql message
-        expect( event.get("tags") ).to be nil
-        expect( event.get("grok") ).to be nil
-        expect( event.get("[@metadata][grok][host][hostname]") ).to eql "evita"
-        expect( event.get("[@metadata][grok][message]") ).to eql "connect from camomile.cloud9.net[168.100.1.3]"
-      end
-    end
   end
 
-  %w(disabled).each do |ecs_mode|
-    describe "ietf 5424 syslog line" do
-    let(:config) { { 'ecs_compatibility' => ecs_mode, "match" => { "message" => "%{SYSLOG5424LINE}" } } }
+  describe "ietf 5424 syslog line - ecs mode disabled" do
+    let(:config) { { 'ecs_compatibility' => 'disabled', "match" => { "message" => "%{SYSLOG5424LINE}" } } }
 
     sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug 4123 - [id1 foo=\"bar\"][id2 baz=\"something\"] Hello, syslog." do
       expect( event.get("tags") ).to be nil
@@ -191,10 +223,10 @@ describe LogStash::Filters::Grok do
       expect( event.get("syslog5424_sd") ).to be nil
       expect( event.get("syslog5424_msg") ).to eql "Appname is nil"
     end
-    end
   end
+
   %w(v1 v8).each do |ecs_mode|
-    describe "ietf 5424 syslog line" do
+    describe "ietf 5424 syslog line - ecs_mode #{ecs_mode}" do
         let(:config) { { "overwrite" => [ "message" ], 'ecs_compatibility' => ecs_mode, "match" => { "message" => "%{SYSLOG5424LINE}" } } }
 
         sample "<191>1 2009-06-30T18:30:00+02:00 paxton.local grokdebug 4123 - [id1 foo=\"bar\"][id2 baz=\"something\"] Hello, syslog." do
