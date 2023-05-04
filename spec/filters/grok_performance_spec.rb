@@ -17,7 +17,7 @@ describe LogStash::Filters::Grok do
     described_class.new(config).tap { |filter| filter.register }
   end
 
-  EVENT_COUNT = 300_000
+  EVENT_COUNT = 1_000_000
 
   describe "base-line performance", :performance => true do
 
