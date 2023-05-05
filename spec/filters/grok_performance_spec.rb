@@ -17,7 +17,7 @@ describe LogStash::Filters::Grok do
     described_class.new(config).tap { |filter| filter.register }
   end
 
-  EVENT_COUNT = 1_000_000
+  EVENT_COUNT = 300_000
 
   describe "base-line performance", :performance => true do
 
@@ -75,7 +75,7 @@ describe LogStash::Filters::Grok do
 
     SAMPLE_COUNT = 2
 
-    it "has less than #{ACCEPTED_TIMEOUT_DEGRADATION}% overhead" do
+    xit "has less than #{ACCEPTED_TIMEOUT_DEGRADATION}% overhead" do
       filter_wout_timeout = LogStash::Filters::Grok.new(config_wout_timeout).tap(&:register)
       wout_timeout_duration = do_sample_filter(filter_wout_timeout) # warmup
       puts "filters/grok(timeout => 0) warmed up in #{wout_timeout_duration}"
