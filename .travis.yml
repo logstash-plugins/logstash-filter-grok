@@ -6,4 +6,4 @@ import:
 env:
   global:
   # disabled running performance tests on CI
-  - HAS_PERFORMANCE_TESTS=0
+  - HAS_PERFORMANCE_TESTS=1

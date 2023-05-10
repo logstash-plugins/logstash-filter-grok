@@ -5,4 +5,4 @@ env
 
 set -ex
 
-jruby -rbundler/setup -S rspec -fd --tag performance
+bundle exec rspec --format=documentation --tag performance
