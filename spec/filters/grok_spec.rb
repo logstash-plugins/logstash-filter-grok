@@ -188,12 +188,12 @@ describe LogStash::Filters::Grok do
       subject.filter(event)
     end
 
-    describe "parsing an event with multiple messages (array of strings)", if: false do
-      let(:config) { { "message" => "(?:hello|world) %{NUMBER}" } }
+    describe "parsing an event with multiple messages (array of strings)" do
+      let(:config) { { "match" => { "message" => "(?:hello|world) %{NUMBER:num}" } } }
       let(:message) { [ "hello 12345", "world 23456" ] }
 
       it "matches them all" do
-        expect( event.get("NUMBER") ).to eql [ "12345", "23456" ]
+        expect( event.get("num") ).to eql [ "12345", "23456" ]
       end
     end
 
@@ -228,7 +228,7 @@ describe LogStash::Filters::Grok do
 
       it "processes declared matches" do
         expect( event.get("word") ).to eql 'hello'
-        expect( event.get("examplefield") ).to eql '12345'
+        expect( event.get("num") ).to eql '12345'
       end
     end
 
