@@ -812,7 +812,7 @@ describe LogStash::Filters::Grok do
         'filter { grok { match => { "message" => "%{WORD:word}" } } }'
       end
 
-      sample("message" => 'hello') do
+      sample({"message" => 'hello'}) do
         expect(subject.get("tags")).to eql ["_grokparsefailure"]
       end
 
@@ -842,7 +842,7 @@ describe LogStash::Filters::Grok do
         "filter { grok { patterns_dir => \"#{tmpdir}\" match => { \"message\" => \"%{WORD:word}\" } } }"
       end
 
-      sample("message" => '0') do
+      sample({"message" => '0'}) do
         expect(subject.get("tags")).to be nil
       end
 
@@ -871,7 +871,7 @@ describe LogStash::Filters::Grok do
         "filter { grok { patterns_dir => \"#{tmpdir}\" patterns_files_glob => \"*.pattern\" match => { \"message\" => \"%{WORD:word}\" } } }"
       end
 
-      sample("message" => '0') do
+      sample({"message" => '0'}) do
         expect(subject.get("tags")).to be nil
       end
 
@@ -897,7 +897,7 @@ describe LogStash::Filters::Grok do
         "filter { grok { patterns_dir => \"#{tmpdir}\" patterns_files_glob => \"*\" match => { \"message\" => \"%{WORD:word}\" } } }"
       end
 
-      sample("message" => '0') do
+      sample({"message" => '0'}) do
         expect(subject.get("tags")).to be nil
       end
 
