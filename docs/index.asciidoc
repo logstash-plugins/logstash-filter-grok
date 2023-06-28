@@ -34,6 +34,8 @@ your own trivially. (See the `patterns_dir` setting)
 
 If you need help building patterns to match your logs, you will find the
 <http://grokdebug.herokuapp.com> and <http://grokconstructor.appspot.com/> applications quite useful!
+Note however that data type conversion to `int` is logstash only - do not expect this to work
+within these debuggers.
 
 ===== Grok or Dissect? Or both?
 
