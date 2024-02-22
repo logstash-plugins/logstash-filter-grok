@@ -33,7 +33,6 @@ Logstash ships with about 120 patterns by default. You can find them here:
 your own trivially. (See the `patterns_dir` setting)
 
 If you need help building patterns to match your logs, try the {kibana-ref}/xpack-grokdebugger.html[Grok debugger] in {kib}.
-quite useful!
 
 ===== Grok or Dissect? Or both?
 
