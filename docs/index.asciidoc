@@ -115,8 +115,14 @@ site].
 
 ==== Custom Patterns
 
-Sometimes logstash doesn't have a pattern you need. For this, you have
-a few options.
+Sometimes Logstash doesn't have a pattern you need. For this, you have
+three options:
+
+* Define pattern using the *Oniguruma syntax*. Note that this will prevent you from setting a nested field (`[foo][bar]`) as a target.
+* Define pattern in a *custom patterns file*. Use this if you have many patterns to define and/or if you want to use your patterns in many places but define them at one place.
+* Define pattern *inline* in the filter using `pattern_definitions`. Use this if the pattern you are defining is only used in the current grok filter call.
+
+===== Oniguruma syntax
 
 First, you can use the Oniguruma syntax for named capture which will
 let you match a piece of text and save it as a field:
@@ -127,6 +133,8 @@ For example, postfix logs have a `queue id` that is an 10 or 11-character
 hexadecimal value. I can capture that easily like this:
 [source,ruby]
     (?<queue_id>[0-9A-F]{10,11})
+
+===== Custom patterns file
 
 Alternately, you can create a custom patterns file.
 
@@ -169,6 +177,8 @@ The above will match and result in the following fields:
 
 The `timestamp`, `logsource`, `program`, and `pid` fields come from the
 `SYSLOGBASE` pattern which itself is defined by other patterns.
+
+===== Inline definition with `pattern_definitions`
 
 Another option is to define patterns _inline_ in the filter using `pattern_definitions`.
 This is mostly for convenience and allows user to define a pattern which can be used just in that 
