@@ -330,10 +330,8 @@
       case ecs_compatibility
       when :disabled
         patterns_path << LogStash::Patterns::Core.path # :legacy
-      when :v1
-        patterns_path << LogStash::Patterns::Core.path('ecs-v1')
-      when :v8
-        @logger.warn("ECS v8 support is a preview of the unreleased ECS v8, and uses the v1 patterns. When Version 8 of the Elastic Common Schema becomes available, this plugin will need to be updated")
+      when :v1, :v8
+        # v8 is an alias for v1; there were no relevant material changes to the schema
         patterns_path << LogStash::Patterns::Core.path('ecs-v1')
       else
         fail(NotImplementedError, "ECS #{ecs_compatibility} is not supported by this plugin.")
