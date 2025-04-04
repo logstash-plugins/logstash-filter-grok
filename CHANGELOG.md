@@ -1,3 +1,6 @@
+## 4.4.4
+  - Removed warning about ECS v8 being a preview [#195](https://github.com/logstash-plugins/logstash-filter-grok/pull/195)
+
 ## 4.4.3
   - Minor typos in docs examples [#176](https://github.com/logstash-plugins/logstash-filter-grok/pull/176)
 

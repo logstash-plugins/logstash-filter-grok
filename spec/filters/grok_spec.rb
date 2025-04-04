@@ -775,26 +775,6 @@ describe LogStash::Filters::Grok do
 end
 
 describe LogStash::Filters::Grok do
-
-  subject(:grok_filter) { described_class.new(config) }
-  let(:config) { {} }
-
-  context 'when initialized with `ecs_compatibility => v8`' do
-    let(:config) { super().merge("ecs_compatibility" => "v8", "match" => ["message", "%{SYSLOGLINE}"]) }
-    context '#register' do
-      let(:logger_stub) { double('Logger').as_null_object }
-      before(:each) { allow_any_instance_of(described_class).to receive(:logger).and_return(logger_stub)}
-
-      it 'logs a helpful warning about the unreleased v8' do
-        grok_filter.register
-
-        expect(logger_stub).to have_received(:warn).with(a_string_including "preview of the unreleased ECS v8")
-      end
-    end
-  end
-end
-
-describe LogStash::Filters::Grok do
   describe "(LEGACY)" do
     describe "patterns in the 'patterns/' dir override core patterns" do
 
