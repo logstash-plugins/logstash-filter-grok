@@ -1,3 +1,6 @@
+## 4.4.4
+  - [DOC] Minor doc fixes and version bump to pick up changes in [#186](https://github.com/logstash-plugins/logstash-filter-grok/pull/186) [#197](https://github.com/logstash-plugins/logstash-filter-grok/pull/197)
+
 ## 4.4.3
   - Minor typos in docs examples [#176](https://github.com/logstash-plugins/logstash-filter-grok/pull/176)
 
@@ -9,7 +12,7 @@
 
 ## 4.4.0
  - Feat: ECS compatibility support [#162](https://github.com/logstash-plugins/logstash-filter-grok/pull/162)
- 
+
    The filter supports using built-in pattern definitions that are fully Elastic Common Schema (ECS) compliant.
 
 ## 4.3.0
@@ -30,7 +33,7 @@
 
 ## 4.0.3
   - Fixed memory leak when run on JRuby 1.x (Logstash 5.x) [#135](https://github.com/logstash-plugins/logstash-filter-grok/issues/135)
-  
+
 ## 4.0.2
   - Fixed resource leak where this plugin might get double initialized during plugin reload, leaking a thread + some objects
 
