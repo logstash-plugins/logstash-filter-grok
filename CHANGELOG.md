@@ -1,5 +1,5 @@
 ## 4.4.4
-  - [DOC] Minor doc fixes and version bump to pick up changes in [#186](https://github.com/logstash-plugins/logstash-filter-grok/pull/186) [#187](https://github.com/logstash-plugins/logstash-filter-grok/pull/187)
+  - [DOC] Minor doc fixes and version bump to pick up changes in [#186](https://github.com/logstash-plugins/logstash-filter-grok/pull/186) [#197](https://github.com/logstash-plugins/logstash-filter-grok/pull/197)
 
 ## 4.4.3
   - Minor typos in docs examples [#176](https://github.com/logstash-plugins/logstash-filter-grok/pull/176)
