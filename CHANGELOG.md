@@ -1,3 +1,6 @@
+## 4.4.4
+ - Fix: replace deprecated `File.exists?` with `File.exist?` for Ruby 3.4 (JRuby 10) compatibility [#197](https://github.com/logstash-plugins/logstash-filter-grok/pull/197)
+
 ## 4.4.3
   - Minor typos in docs examples [#176](https://github.com/logstash-plugins/logstash-filter-grok/pull/176)
 

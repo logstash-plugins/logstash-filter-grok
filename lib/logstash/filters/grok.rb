@@ -465,7 +465,7 @@
 
     def add_patterns_from_files(paths, grok)
       paths.each do |path|
-        if !File.exists?(path)
+        if !File.exist?(path)
           raise "Grok pattern file does not exist: #{path}"
         end
         grok.add_patterns_from_file(path)
