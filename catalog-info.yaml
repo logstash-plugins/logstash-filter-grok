@@ -42,6 +42,6 @@ spec:
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
       teams:
         logstash-core:
-          role: MANAGE_BUILD_AND_READ
+          access_level: MANAGE_BUILD_AND_READ
         employees:
-          role: READ_ONLY
+          access_level: READ_ONLY
