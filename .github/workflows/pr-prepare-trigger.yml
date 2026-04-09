@@ -1,0 +1,14 @@
+# Example workflow for plugin repositories
+# Copy this to .github/workflows/changelog.yml in each plugin repo
+
+name: Changelog Management
+
+on:
+  pull_request:
+    types: [opened, labeled]
+
+jobs:
+  changelog:
+    uses: alexcams/.github/.github/workflows/pr-prepare.yml@main
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
