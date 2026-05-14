@@ -1,0 +1,22 @@
+name: Plugin Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    # Run daily at 08:00 UTC on active branches
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  unit-tests:
+    uses: logstash-plugins/.ci/.github/workflows/unit-tests.yml@1.x
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    with:
+      timeout-minutes: 60
