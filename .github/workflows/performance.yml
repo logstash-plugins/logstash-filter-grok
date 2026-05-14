@@ -1,0 +1,12 @@
+name: Plugin Performance Tests
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  performance:
+    uses: logstash-plugins/.ci/.github/workflows/performance.yml@1.x
