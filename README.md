@@ -1,6 +1,6 @@
 # Logstash Plugin
 
-[![Travis Build Status](https://travis-ci.com/logstash-plugins/logstash-filter-grok.svg)](https://travis-ci.com/logstash-plugins/logstash-filter-grok)
+[![Unit Tests](https://github.com/logstash-plugins/logstash-filter-grok/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/logstash-plugins/logstash-filter-grok/actions/workflows/unit-tests.yml)
 
 This is a plugin for [Logstash](https://github.com/elastic/logstash).
 
