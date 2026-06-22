@@ -10,3 +10,4 @@ on:
 jobs:
   performance:
     uses: logstash-plugins/.ci/.github/workflows/performance.yml@1.x
+    secrets: inherit
