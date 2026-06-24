@@ -376,19 +376,20 @@
       end
 
       def match(context, groks, event, break_on_match)
-        matched = false
+        matched = any_matched = false
 
         groks.each do |grok|
           context.set_grok(grok)
 
           matched = execute(context, grok)
+	  any_matched ||= matched
           if matched
             grok.capture(matched) { |field, value| @filter.handle(field, value, event) }
             break if break_on_match
           end
         end
 
-        matched
+        any_matched
       end
 
       protected

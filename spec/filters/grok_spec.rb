@@ -770,8 +770,37 @@ describe LogStash::Filters::Grok do
         end
       end
     end
-  end
 
+    describe "when multiple patterns are there and break_on_match is false" do
+      let(:config) {
+        {
+          'match' => { "message" => [ "^%{WORD:name} %{INT:number}", "^%{INT:number} %{WORD:name}", "^%{IP:ip} %{WORD:name} %{INT:number}" ] },
+          'break_on_match' => false
+        }
+      }
+      sample 'abc 12'  do
+        expect( event.get("tags") ).to be nil
+        expect( event.get("name") ).to eql "abc"
+        expect( event.get("number") ).to eql "12"
+	expect( event.get("ip") ).to be nil
+      end
+      sample '1.1.1.1 abc 12' do
+        expect( event.get("tags") ).to be nil
+        expect( event.get("name") ).to eql "abc"
+        expect( event.get("ip") ).to eql "1.1.1.1"
+        expect( event.get("number") ).to eql '12'
+      end
+      sample( '12 abc' ) do
+        expect( event.get("tags") ).to be nil
+        expect( event.get("name") ).to eql "abc"
+        expect( event.get("ip") ).to be nil
+        expect( event.get("number") ).to eql "12"
+      end
+      sample('1.1.1.1 abc') do
+	expect( event.get("tags")).to eql ["_grokparsefailure"]
+      end
+    end
+  end
 end
 
 describe LogStash::Filters::Grok do
